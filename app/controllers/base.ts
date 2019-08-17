@@ -1,14 +1,16 @@
 import express from "express";
 import "reflect-metadata";
+import { Base } from "../models/base";
 
 export const metadata: any = {
     controllers: {}
 };
 
-export function Controller(value: string) {
+export function Controller(value: string, value2: string = "") {
     return (constructor: Function) => {
         const controller = metadata.controllers[constructor.name] || {};
         controller.path = value;
+        controller.pathSingular = value2;
         controller.class = constructor;
         metadata.controllers[constructor.name] = controller;
     };
@@ -55,15 +57,15 @@ function _addVerbFunctionMeta({ verb, path, object, methodName, }: any) {
     metadata.controllers[object.constructor.name] = controller;
 }
 
-type ArgumentTypes<F extends Function> = F extends (...args: infer A) => any ? A : never;
-
 export class BaseController {
 
     public metadata: any = {};
 
     public generateRoutes(router: express.Router | any) {
         const controller = metadata.controllers[this.constructor.name];
+
         const keys = Object.keys(controller.actions);
+
         keys.forEach((k) => {
             const action = controller.actions[k];
             const path = "/api/" + controller.path + "/" + action.path;
@@ -82,26 +84,52 @@ export class BaseController {
                         }
                         fPrams.push(val);
                     } else if (action.verb === "post" || action.verb === "put") {
-                        console.log(req);
-                        console.log(req.body);
-                        const val = req.body[mp.name];
-                        fPrams.push(val);
+                        fPrams.push(req.body[mp.name]);
                     }
                 });
-                const ret = await p[k].apply(undefined, fPrams);
-                res.send(ret);
+                try {
+                    const ret = await p[k].apply(this, fPrams);
+                    res.send(ret);
+                } catch (error) {
+                    console.error(error);
+                    res.send({error: true, details: error.stack});
+                }
             });
         });
-        // console.log(this.constructor.name);
-        // console.log(metadata.controllers[this.constructor.name]);
     }
 }
 
 // tslint:disable-next-line:max-classes-per-file
 export class BaseControllerOf<T> extends BaseController {
-
-    public generateRoutes() {
-        console.log(this.constructor.name);
-        console.log(metadata.controllers[this.constructor.name]);
+    public metadata: any = {};
+    public model: Base<T>;
+    constructor() {
+        super();
+        const controller = metadata.controllers[this.constructor.name];
+        _addVerbFunctionMeta({ verb: "get", path: controller.pathSingular + "/:id", object: this, methodName: "getRecord" });
+        _addVerbFunctionMeta({ verb: "get", path: "all", object: this, methodName: "getRecords" });
     }
+
+    public async getRecord(id: string) {
+        this.model.id = id;
+        return await this.model.load();
+    }
+
+    public async getRecords() {
+        const ret = await this.model.loadAll();
+        return ret;
+    }
+
+    // public deleteRecord(id: string) {
+
+    // }
+
+    // public createRecord() {
+
+    // }
+
+    // public updateRecord() {
+
+    // }
+
 }

@@ -17,7 +17,7 @@ class OrientConnection {
         return await OrientDBClient.connect({
             host,
             port,
-            logger : { debug : console.log.bind(console, "[ORIENTDB]")}
+            logger : { debug : console.log.bind(console,  "\x1b[34m", "[ORIENTDB]")}
         });
     }
 

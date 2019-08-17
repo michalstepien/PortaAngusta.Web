@@ -10,7 +10,7 @@ f.forEach((sourceFile) => {
         const mm: any = {};
         const cName = cl.getName();
         if (cName === "BaseController" || cName === "BaseControllerOf") { return; }
-        console.log(cName, "haaa");
+
         cl.getMethods().forEach((method) => {
             const mName = method.getName();
             mm[mName] = { params: []};
@@ -24,6 +24,21 @@ f.forEach((sourceFile) => {
                 mm[mName].params.push(pTemp);
             }
         });
+        const baseClass = cl.getBaseClass();
+        if (baseClass && baseClass.getName() === "BaseControllerOf") {
+            baseClass.getMethods().forEach((method) => {
+                const mName = method.getName();
+                mm[mName] = { params: []};
+                for (const param of method.getParameters()) {
+                    const pTemp: any = {};
+                    pTemp.name = param.getName();
+                    pTemp.type = param.getType().getText();
+                    pTemp.optional = param.isOptional();
+                    pTemp.defaultValue = !!param.getInitializer();
+                    mm[mName].params.push(pTemp);
+                }
+            });
+        }
 
         cl.addProperty({
             name: "metadata",

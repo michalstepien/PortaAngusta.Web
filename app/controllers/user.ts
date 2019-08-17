@@ -12,7 +12,7 @@ export class UserController extends BaseController {
         return r;
     }
 
-    @Get("users/all")
+    @Get("all")
     public async getUsers() {
         const usr: User = new User();
         const r = usr.loadAll();
@@ -36,5 +36,20 @@ export class UserController extends BaseController {
         const s = await usr.save();
 
         return s;
+    }
+
+    @Get("traverse")
+    public async traverse() {
+        const usr: User = new User();
+        const ret = await usr.traverseFromClass();
+        return ret;
+    }
+
+    @Get("traverse/:id")
+    public async traverseById(id: string) {
+        const usr: User = new User();
+        usr.id = id;
+        const ret = await usr.traverseFromId();
+        return ret;
     }
 }

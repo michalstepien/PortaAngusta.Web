@@ -16,15 +16,14 @@ async function createController() {
             const model = await import("../controllers/" + file.replace(".ts", ""));
             const keys = Object.keys(model);
             keys.forEach((k) => {
-                if (Object.getPrototypeOf(model[k]) === BaseController) {
+                if (Object.getPrototypeOf(model[k]) === BaseController ||
+                Object.getPrototypeOf(model[k]) === BaseControllerOf) {
                     const instance: BaseController = new model[k]();
                     instance.generateRoutes(router);
                 }
             });
         }
-
     });
-    console.log("tutaj;");
     return router;
 }
 

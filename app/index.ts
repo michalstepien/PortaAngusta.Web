@@ -52,7 +52,7 @@ app.use(express.json());
 // start the express server
 app.listen(port, () => {
   // tslint:disable-next-line:no-console
-  console.log("\x1b[36m%s\x1b[0m", `server 8started at http://localhost:${port}`);
+  console.log("\x1b[36m%s\x1b[0m", `SERVER STARTED at http://localhost:${port}`);
 });
 
 (async () => {

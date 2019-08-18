@@ -1,3 +1,4 @@
+import { Company } from "../models/company";
 import { User } from "../models/user";
 import { BaseController, Controller, Delete, Get, Post, Put } from "./base";
 
@@ -51,5 +52,16 @@ export class UserController extends BaseController {
         usr.id = id;
         const ret = await usr.traverseFromId();
         return ret;
+    }
+
+    @Get("company")
+    public async getCompany() {
+        const c: Company = new Company();
+        c.id = "21:0";
+        const r = await c.load();
+        const ret = await r.mainAddress;
+        const ret3 = await r.mainAddress;
+        console.log(c, ret);
+        return c;
     }
 }

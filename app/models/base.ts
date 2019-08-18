@@ -3,14 +3,51 @@ import connection from "../db";
 
 const dbPropertyMetadataKey = Symbol("dbProperty");
 
-export function dbProperty(name: string = "") {
+export enum dbTypes {
+    /**
+     * Handles only the values True or False
+     */
+    Boolean = 0,
+    /**
+     * 32-bit signed Integers
+     */
+    Integer = 1,
+    /**
+     * Small 16-bit signed integers
+     */
+    Short = 2,
+    Long = 3,
+    Float = 4,
+    Double = 5,
+    Datetime = 6,
+    String = 7,
+    Binary = 8,
+    Embedded = 9,
+    EmbeddedList = 10,
+    EmbeddedSet = 11,
+    EmbeddedMap = 12,
+    Link = 13,
+    LinkList = 14,
+    LinkSet = 15,
+    LinkMap = 16,
+    Byte = 17,
+    Transient = 18,
+    Date = 19,
+    Custom = 20,
+    Decimal = 21,
+    LinkBag = 22,
+    Any = 23
+}
+
+export function dbProperty(name: string = "", type: dbTypes = null, linkedClass: any = null) {
     return (c: any, key: string) => {
         const model = metadataModel.model[c.constructor.name] || {};
-        if (name === "") { name = key; }
+        if (name === "" || !name) { name = key; }
         if (!model.propertiesImport) { model.propertiesImport = {}; }
         if (!model.propertiesExport) { model.propertiesExport = {}; }
-        model.propertiesImport[name] = key;
-        model.propertiesExport[key] = name;
+        model.propertiesImport[name] = { name: key, type, class: linkedClass } ;
+        model.propertiesExport[key] = { name, type, class: linkedClass };
+
         metadataModel.model[c.constructor.name] = model;
     };
 }
@@ -48,6 +85,29 @@ export class Base<T> {
 
     constructor(type: any) {
         this.type = type;
+        return new Proxy(this, {
+            get(target: any, name, receiver) {
+                const model = metadataModel.model[target.constructor.name];
+                if (!model) { return Reflect.get(target, name, receiver); }
+                if (!model.propertiesExport[name]) { return Reflect.get(target, name, receiver); }
+                if (model.propertiesExport[name].type === dbTypes.Link) {
+                    const v = Reflect.get(target, name, receiver);
+                    if (v && v.id && v._lz) {
+                        const cls = model.propertiesExport[name].class;
+                        const p: Base<typeof cls> = new  model.propertiesExport[name].class();
+                        p.id = v.id;
+                        return p.load().then((d: any) => {
+                            target[name] = p;
+                            return Reflect.get(target, name, receiver);
+                        });
+                    } else {
+                        return Reflect.get(target, name, receiver);
+                    }
+                } else {
+                    return Reflect.get(target, name, receiver);
+                }
+            }
+          });
     }
 
     public async loadAll(): Promise<T[]> {
@@ -68,11 +128,11 @@ export class Base<T> {
         const ses = await connection.ses();
         const cls = await ses.class.get(metadataModel.model[this.constructor.name].dbClass);
         try {
-            const saved =  await cls.create(this.exportRecord());
+            const saved = await cls.create(this.exportRecord());
             ses.close();
             return saved;
         } catch (error) {
-            return { error: false} as any;
+            return { error: false } as any;
         }
 
     }
@@ -133,8 +193,15 @@ export class Base<T> {
         const toImp = model.propertiesImport;
         const keysThis = Object.keys(toImp).filter((x: string) => x !== "id");
         keysThis.forEach((k) => {
-            if (this.hasOwnProperty(toImp[k])) {
-                (this as any)[toImp[k]] = record[k];
+            if (this.hasOwnProperty(toImp[k].name)) {
+                if (toImp[k].type === dbTypes.Link) {
+
+                    if (record[k] && record[k].cluster) {
+                        (this as any)[toImp[k].name] = {id: record[k].cluster + ":" + record[k].position, _lz: true };
+                    }
+                } else {
+                    (this as any)[toImp[k].name] = record[k];
+                }
             }
         });
         return this as any;
@@ -157,11 +224,11 @@ export class Base<T> {
                 (inst as any)[toImp[k]] = record[k];
             }
         });
-        return inst as Base<any> ;
+        return inst as Base<any>;
     }
 
     public exportRecord(insert: boolean = true) {
-        const r: any = { };
+        const r: any = {};
         const keys = Object.keys(this).filter((x: string) => x !== "id");
         const that: any = this;
         keys.forEach((k) => {
@@ -184,6 +251,6 @@ export class DbError extends Error {
     }
 
     public format() {
-        return {message: this.message , stack: this.stack, name: this.name};
+        return { message: this.message, stack: this.stack, name: this.name };
     }
 }

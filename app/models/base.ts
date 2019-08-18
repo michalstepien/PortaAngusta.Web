@@ -45,7 +45,7 @@ export function dbProperty(name: string = "", type: dbTypes = null, linkedClass:
         if (name === "" || !name) { name = key; }
         if (!model.propertiesImport) { model.propertiesImport = {}; }
         if (!model.propertiesExport) { model.propertiesExport = {}; }
-        model.propertiesImport[name] = { name: key, type, class: linkedClass } ;
+        model.propertiesImport[name] = { name: key, type, class: linkedClass };
         model.propertiesExport[key] = { name, type, class: linkedClass };
 
         metadataModel.model[c.constructor.name] = model;
@@ -90,14 +90,36 @@ export class Base<T> {
                 const model = metadataModel.model[target.constructor.name];
                 if (!model) { return Reflect.get(target, name, receiver); }
                 if (!model.propertiesExport[name]) { return Reflect.get(target, name, receiver); }
-                if (model.propertiesExport[name].type === dbTypes.Link) {
+                const ep = model.propertiesExport[name];
+                if (ep.type === dbTypes.Link) {
                     const v = Reflect.get(target, name, receiver);
                     if (v && v.id && v._lz) {
-                        const cls = model.propertiesExport[name].class;
-                        const p: Base<typeof cls> = new  model.propertiesExport[name].class();
+                        const cls = ep.class;
+                        const p: Base<typeof cls> = new ep.class();
                         p.id = v.id;
                         return p.load().then((d: any) => {
                             target[name] = p;
+                            return Reflect.get(target, name, receiver);
+                        });
+                    } else {
+                        return Reflect.get(target, name, receiver);
+                    }
+                } else if (ep.type === dbTypes.LinkList) {
+                    const v: any [] = Reflect.get(target, name, receiver);
+                    if (v.length > 0 && v[0]._lz) {
+                        const cls = ep.class;
+                        return target.loadProjection(ep.name, target.id).then((rPr: any) => {
+                            const d = rPr[ep.name];
+                            if ( d.length === 0 ) {
+                                target[name] = [];
+                                return Reflect.get(target, name, receiver);
+                            }
+                            target[name] = [];
+                            d.forEach((e: any) => {
+                                const p: Base<typeof cls> = new ep.class();
+                                p.importRecord(e);
+                                target[name].push(p);
+                            });
                             return Reflect.get(target, name, receiver);
                         });
                     } else {
@@ -107,7 +129,7 @@ export class Base<T> {
                     return Reflect.get(target, name, receiver);
                 }
             }
-          });
+        });
     }
 
     public async loadAll(): Promise<T[]> {
@@ -195,10 +217,39 @@ export class Base<T> {
         keysThis.forEach((k) => {
             if (this.hasOwnProperty(toImp[k].name)) {
                 if (toImp[k].type === dbTypes.Link) {
-
                     if (record[k] && record[k].cluster) {
-                        (this as any)[toImp[k].name] = {id: record[k].cluster + ":" + record[k].position, _lz: true };
+                        (this as any)[toImp[k].name] = { id: record[k].cluster + ":" + record[k].position, _lz: true };
+                    } else {
+                        (this as any)[toImp[k].name] = null;
                     }
+                } else if (toImp[k].type === dbTypes.LinkList) {
+                    const tmpArr: any = [];
+                    if (record[k] && record[k].length > 0) {
+                        record[k].forEach((r: any) => {
+                            const lnk = { id: r.cluster + ":" + r.position, _lz: true };
+                            tmpArr.push(lnk);
+                        });
+                    }
+                    (this as any)[toImp[k].name] = tmpArr;
+                } else if (toImp[k].type === dbTypes.LinkSet) {
+                    (this as any)[toImp[k].name] = new Set();
+                    if (record[k] && record[k].length > 0) {
+                        record[k].forEach((r: any) => {
+                            const lnk = { id: r.cluster + ":" + r.position, _lz: true };
+                            (this as any)[toImp[k].name].add(lnk);
+                        });
+                    }
+                } else if (toImp[k].type === dbTypes.Embedded) {
+                    if (record[k]) {
+                        const ep = toImp[k];
+                        const cls = ep.class;
+                        const p: Base<typeof cls> = new ep.class();
+                        p.importRecord(record[k]);
+                        (this as any)[toImp[k].name] = p;
+                    } else {
+                        (this as any)[toImp[k].name] = null;
+                    }
+
                 } else {
                     (this as any)[toImp[k].name] = record[k];
                 }
@@ -240,6 +291,13 @@ export class Base<T> {
             }
         });
         return r;
+    }
+
+    private async loadProjection(name: string, id: string): Promise<any> {
+        const ses = await connection.ses();
+        const ret = await ses.select(name + ":{@rid,@class,*}").from("#" + id).one();
+        ses.close();
+        return ret;
     }
 }
 

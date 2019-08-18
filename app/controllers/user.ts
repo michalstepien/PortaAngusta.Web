@@ -57,11 +57,12 @@ export class UserController extends BaseController {
     @Get("company")
     public async getCompany() {
         const c: Company = new Company();
-        c.id = "21:0";
+        c.id = "22:0";
         const r = await c.load();
-        const ret = await r.mainAddress;
-        const ret3 = await r.mainAddress;
-        console.log(c, ret);
+        const d = await c.addressesList;
+        // const ret = await r.mainAddress;
+        // const ret3 = await r.mainAddress;
+        console.log(d);
         return c;
     }
 }

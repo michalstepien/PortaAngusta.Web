@@ -9,6 +9,7 @@
     "build": "tsc app/build.ts --outDir dist && node dist/build.js",
     "debug": "node --nolazy --inspect-brk=9229 dist/index.js",
     "prestart": "npm run build",
+    "test": "cd frontend & npm run test-frontend",
     "start": "node dist/index.js",
     "start_frontend": "cd frontend & npm run startp",
     "watch": "concurrently \"nodemon\" \"npm run start_frontend\""

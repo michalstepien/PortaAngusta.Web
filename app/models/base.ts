@@ -1,3 +1,4 @@
+import { stringify } from "querystring";
 import "reflect-metadata";
 import connection from "../db";
 
@@ -232,13 +233,23 @@ export class Base<T> {
                     }
                     (this as any)[toImp[k].name] = tmpArr;
                 } else if (toImp[k].type === dbTypes.LinkSet) {
-                    (this as any)[toImp[k].name] = new Set();
+                    const tmpSet = new Set();
                     if (record[k] && record[k].length > 0) {
                         record[k].forEach((r: any) => {
                             const lnk = { id: r.cluster + ":" + r.position, _lz: true };
-                            (this as any)[toImp[k].name].add(lnk);
+                            tmpSet.add(lnk);
                         });
                     }
+                    (this as any)[toImp[k].name] = tmpSet;
+                } else if (toImp[k].type === dbTypes.LinkMap) {
+                    const tmpMap = new Map<string, any>();
+                    if (record[k] && record[k].length > 0) {
+                        record[k].forEach((r: any) => {
+                            const lnk = { id: r.cluster + ":" + r.position, _lz: true };
+                            tmpMap.set("", lnk);
+                        });
+                    }
+                    (this as any)[toImp[k].name] = tmpMap;
                 } else if (toImp[k].type === dbTypes.Embedded) {
                     if (record[k]) {
                         const ep = toImp[k];

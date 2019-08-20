@@ -57,7 +57,7 @@ export class UserController extends BaseController {
     @Get("company")
     public async getCompany() {
         const c: Company = new Company();
-        c.id = "22:0";
+        c.id = "21:0";
         const r = await c.load();
         const d = await c.addressesList;
         // const ret = await r.mainAddress;

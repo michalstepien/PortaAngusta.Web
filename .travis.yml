@@ -9,3 +9,6 @@ script:
   - npm run lint
   - npm run test-frontend
   - npm run build
+  - cd ..
+  - npm run build
+  - npm run codecv

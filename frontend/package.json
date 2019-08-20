@@ -7,7 +7,7 @@
     "startp": "ng serve --proxy-config proxy.config.json",
     "build": "ng build",
     "test": "ng test",
-    "test-frontend": "ng test --watch=false --browsers=ChromeHeadless",
+    "test-frontend": "ng test --watch=false --browsers=ChromeHeadless --code-coverage",
     "lint": "ng lint",
     "e2e": "ng e2e"
   },

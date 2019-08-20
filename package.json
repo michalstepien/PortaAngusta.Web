@@ -10,6 +10,7 @@
     "debug": "node --nolazy --inspect-brk=9229 dist/index.js",
     "prestart": "npm run build",
     "test": "cd frontend & npm run test-frontend",
+    "codecv": "./node_modules/.bin/codecov",
     "start": "node dist/index.js",
     "start_frontend": "cd frontend & npm run startp",
     "watch": "concurrently \"nodemon\" \"npm run start_frontend\""
@@ -40,6 +41,7 @@
     "@types/passport": "^1.0.0",
     "@types/passport-facebook": "^2.1.9",
     "@types/passport-local": "^1.0.33",
+    "codecov": "^3.5.0",
     "concurrently": "^4.1.1",
     "nodemon": "^1.19.1",
     "ts-morph": "^3.1.3",

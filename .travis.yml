@@ -1,16 +1,7 @@
 language: node_js
 node_js:
  - "node"
- jobs:
-  include:
-    - stage: test
-      script:
-        - echo 'Deploy!!'
-        - echo 'Installing Deps!'
-        - npm install
-        - echo 'Testing!'
-        - cd frontend
-        - npm run test
-    - stage: deploy
-      script:
-        - npm run build
+before_script: cd frontend
+script:
+  - npm install
+  - npm test

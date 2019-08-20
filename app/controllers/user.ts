@@ -62,7 +62,6 @@ export class UserController extends BaseController {
         const d = await c.addressesList;
         // const ret = await r.mainAddress;
         // const ret3 = await r.mainAddress;
-        console.log(d);
         return c;
     }
 }

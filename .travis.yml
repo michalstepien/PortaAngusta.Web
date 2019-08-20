@@ -4,4 +4,6 @@ node_js:
 before_script: cd frontend
 script:
   - npm install
-  - npm test
+  - npm run lint
+  - npm run test-frontend
+  - npm run build

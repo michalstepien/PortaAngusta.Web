@@ -72,21 +72,23 @@ export class BaseController {
             router[action.verb](path, async (req: any, res: any) => {
                 const fPrams: any = [];
                 const p: any = this;
-                this.metadata[k].params.forEach((mp: any) => {
-                    if (action.verb === "get" || action.verb === "delete") {
-                        let val = req.params[mp.name];
-                        if (val !== undefined && val !== null) {
-                            if (mp.type === "number") {
-                                val = Number(val);
-                            } else if (mp.type === "Date") {
-                                val = new Date(val);
+                if (this.metadata[k]) {
+                    this.metadata[k].params.forEach((mp: any) => {
+                        if (action.verb === "get" || action.verb === "delete") {
+                            let val = req.params[mp.name];
+                            if (val !== undefined && val !== null) {
+                                if (mp.type === "number") {
+                                    val = Number(val);
+                                } else if (mp.type === "Date") {
+                                    val = new Date(val);
+                                }
                             }
+                            fPrams.push(val);
+                        } else if (action.verb === "post" || action.verb === "put") {
+                            fPrams.push(req.body[mp.name]);
                         }
-                        fPrams.push(val);
-                    } else if (action.verb === "post" || action.verb === "put") {
-                        fPrams.push(req.body[mp.name]);
-                    }
-                });
+                    });
+                }
                 try {
                     const ret = await p[k].apply(this, fPrams);
                     res.send(ret);

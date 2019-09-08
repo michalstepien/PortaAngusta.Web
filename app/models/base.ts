@@ -40,10 +40,10 @@ export enum dbTypes {
     Any = 23
 }
 
-export function dbProperty(name: string = "", type: dbTypes = null, linkedClass: any = null) {
+export function dbProperty(name: string = '', type: dbTypes = null, linkedClass: any = null) {
     return (c: any, key: string) => {
         const model = metadataModel.model[c.constructor.name] || {};
-        if (name === "" || !name) { name = key; }
+        if (name === '' || !name) { name = key; }
         if (!model.propertiesImport) { model.propertiesImport = {}; }
         if (!model.propertiesExport) { model.propertiesExport = {}; }
         model.propertiesImport[name] = { name: key, type, class: linkedClass };
@@ -59,7 +59,7 @@ export const metadataModel: any = {
 };
 
 export function ModelClass(value: string) {
-    return (constructor: Function) => {
+    return (constructor: any) => {
         const model = metadataModel.model[constructor.name] || {};
         model.dbClass = value;
         model.class = constructor;
@@ -169,14 +169,14 @@ export class Base<T> {
 
     public async  delete(): Promise<T> {
         const ses = await connection.ses();
-        const ret = ses.record.delete("#" + this.id);
+        const ret = ses.record.delete('#' + this.id);
         ses.close();
         return ret;
     }
 
     public async  update(): Promise<T> {
         const ses = await connection.ses();
-        const ret = ses.record.delete("#" + this.id);
+        const ret = ses.record.delete('#' + this.id);
         ses.close();
         return ret;
     }
@@ -207,19 +207,19 @@ export class Base<T> {
 
     public importRecord(record: any, fromDB: boolean = false) {
         const model = metadataModel.model[this.constructor.name];
-        if (record["@rid"]) {
-            this.id = record["@rid"].cluster + ":" + record["@rid"].position;
+        if (record['@rid']) {
+            this.id = record['@rid'].cluster + ':' + record['@rid'].position;
         }
-        if (record["@class"] !== model.dbClass) {
-            throw new DbError("Cannot load db class:" + record["@class"] + " to: " + this.constructor.name + "model");
+        if (record['@class'] !== model.dbClass) {
+            throw new DbError('Cannot load db class:' + record['@class'] + ' to: ' + this.constructor.name + 'model');
         }
         const toImp = model.propertiesImport;
-        const keysThis = Object.keys(toImp).filter((x: string) => x !== "id");
+        const keysThis = Object.keys(toImp).filter((x: string) => x !== 'id');
         keysThis.forEach((k) => {
             if (this.hasOwnProperty(toImp[k].name)) {
                 if (toImp[k].type === dbTypes.Link) {
                     if (record[k] && record[k].cluster) {
-                        (this as any)[toImp[k].name] = { id: record[k].cluster + ":" + record[k].position, _lz: true };
+                        (this as any)[toImp[k].name] = { id: record[k].cluster + ':' + record[k].position, _lz: true };
                     } else {
                         (this as any)[toImp[k].name] = null;
                     }
@@ -227,7 +227,7 @@ export class Base<T> {
                     const tmpArr: any = [];
                     if (record[k] && record[k].length > 0) {
                         record[k].forEach((r: any) => {
-                            const lnk = { id: r.cluster + ":" + r.position, _lz: true };
+                            const lnk = { id: r.cluster + ':' + r.position, _lz: true };
                             tmpArr.push(lnk);
                         });
                     }
@@ -306,13 +306,13 @@ export class Base<T> {
 
     private async loadProjection(name: string, id: string): Promise<any> {
         const ses = await connection.ses();
-        const ret = await ses.select(name + ":{@rid,@class,*}").from("#" + id).one();
+        const ret = await ses.select(name + ':{@rid,@class,*}').from('#' + id).one();
         ses.close();
         return ret;
     }
 }
 
-// tslint:disable-next-line:max-classes-per-file
+
 export class DbError extends Error {
     constructor(m: string) {
         super(m);

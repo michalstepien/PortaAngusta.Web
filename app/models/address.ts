@@ -1,13 +1,13 @@
-import { Base, dbProperty, ModelClass } from "./base";
+import { Base, dbProperty, ModelClass } from './base';
 
-@ModelClass("Address")
+@ModelClass('Address')
 export class Address extends Base<Address> {
 
     @dbProperty()
-    public id: string = "";
+    public id = '';
 
     @dbProperty()
-    public City: string = "";
+    public City = '';
 
     constructor() {
         super(Address);

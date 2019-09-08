@@ -37,6 +37,15 @@ class App {
         this.app.use(passport.session());
         this.app.use(session({ secret: 'keyboard cat', resave: false, saveUninitialized: false }));
         this.app.use(express.json());
+        this.app.set(
+            'json replacer',
+            ( key: any, value: any ) => {
+                if (typeof value === 'object' && value instanceof Set) {
+                    return [...value];
+                }
+                return value;
+            }
+        );
     }
 
     private configSwagger() {

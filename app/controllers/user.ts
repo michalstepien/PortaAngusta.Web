@@ -59,11 +59,14 @@ export class UserController extends BaseController {
     }
 
     @Get('company')
+    @Description('Get company from DB addressesList')
+    @Return(Company)
     public async getCompany() {
         const c: Company = new Company();
-        c.id = '21:0';
+        c.id = '21:1';
         const r = await c.load();
         const d = await c.addressesList;
+        const e = await c.addressesLinkset;
         // const ret = await r.mainAddress;
         // const ret3 = await r.mainAddress;
         return c;

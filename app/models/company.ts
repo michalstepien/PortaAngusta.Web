@@ -16,6 +16,9 @@ export class Company extends Base<Company> {
     @dbProperty(null, dbTypes.LinkList, Address)
     public addressesList: Promise<Address[]> = [] as any;
 
+    @dbProperty(null, dbTypes.LinkSet, Address)
+    public addressesLinkset: Promise<Set<Address>> = [] as any;
+
     // @dbProperty(null, dbTypes.LinkMap, Address)
     // public addressesMap: Promise<Map<string, Address>> = null;
 

@@ -92,6 +92,7 @@ export class Base<T> {
                     }
                 } else if (ep.type === dbTypes.LinkList) {
                     const v: any [] = Reflect.get(target, name, receiver);
+                    console.log(v);
                     if (v.length > 0 && v[0]._lz) {
                         const cls = ep.class;
                         return target.loadProjection(ep.name, target.id).then((rPr: any) => {
@@ -105,6 +106,27 @@ export class Base<T> {
                                 const p: Base<typeof cls> = new ep.class();
                                 p.importRecord(e);
                                 target[name].push(p);
+                            });
+                            return Reflect.get(target, name, receiver);
+                        });
+                    } else {
+                        return Reflect.get(target, name, receiver);
+                    }
+                } else if (ep.type === dbTypes.LinkSet) {
+                    const v: Set<any> = Reflect.get(target, name, receiver);
+                    if (v.size > 0 && v.values().next().value._lz) {
+                        const cls = ep.class;
+                        return target.loadProjection(ep.name, target.id).then((rPr: any) => {
+                            const d = rPr[ep.name];
+                            if ( d.length === 0 ) {
+                                target[name] = new Set<any>();
+                                return Reflect.get(target, name, receiver);
+                            }
+                            target[name] = new Set<any>();
+                            d.forEach((e: any) => {
+                                const p: Base<typeof cls> = new ep.class();
+                                p.importRecord(e);
+                                target[name].add(p);
                             });
                             return Reflect.get(target, name, receiver);
                         });

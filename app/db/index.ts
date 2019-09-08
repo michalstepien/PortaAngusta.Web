@@ -1,5 +1,5 @@
-const OrientDBClient = require("orientjs").OrientDBClient;
-import dotenv from "dotenv";
+const OrientDBClient = require('orientjs').OrientDBClient;
+import dotenv from 'dotenv';
 dotenv.config();
 
 const port = process.env.DB_PORT;
@@ -17,7 +17,7 @@ class OrientConnection {
         return await OrientDBClient.connect({
             host,
             port,
-            logger : { debug : console.log.bind(console,  "\x1b[34m", "[ORIENTDB]")}
+            logger : { debug : console.log.bind(console,  '\x1b[34m', '[ORIENTDB]')}
         });
     }
 

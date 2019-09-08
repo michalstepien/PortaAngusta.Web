@@ -1,19 +1,19 @@
-import { Base, dbProperty, ModelClass } from "./base";
+import { Base, dbProperty, ModelClass } from './base';
 
-@ModelClass("OUser")
+@ModelClass('OUser')
 export class User extends Base<User> {
 
     @dbProperty()
-    public id: string = "";
+    public id = '';
 
     @dbProperty()
-    public name: string = "";
+    public name = '';
 
-    @dbProperty("password")
-    public haslo: string = "";
+    @dbProperty('password')
+    public haslo = '';
 
     @dbProperty()
-    public status: string = "ACTIVE";
+    public status = 'ACTIVE';
 
     constructor() {
         super(User);

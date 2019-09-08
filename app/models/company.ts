@@ -1,14 +1,14 @@
-import { Address } from "./address";
-import { Base, dbProperty, dbTypes, ModelClass } from "./base";
+import { Address } from './address';
+import { Base, dbProperty, dbTypes, ModelClass } from './base';
 
-@ModelClass("Company")
+@ModelClass('Company')
 export class Company extends Base<Company> {
 
     @dbProperty()
-    public id: string = "";
+    public id = '';
 
     @dbProperty()
-    public name: string = "";
+    public name = '';
 
     @dbProperty(null, dbTypes.Link, Address)
     public mainAddress: Promise<Address> = null;

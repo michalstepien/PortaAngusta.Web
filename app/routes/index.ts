@@ -1,19 +1,18 @@
-import express from "express";
-import fs from "fs";
-import path from "path";
+import express from 'express';
+import fs from 'fs';
 const fsPromises = fs.promises;
 
-import { BaseController, BaseControllerOf } from "../controllers/base";
+import { BaseController, BaseControllerOf } from '../controllers/base';
 
 const router = express.Router();
 
 async function createController() {
-    const directoryPath = "./app/controllers";
+    const directoryPath = './app/controllers';
     const files = await fsPromises.readdir(directoryPath);
 
     files.forEach(async (file) => {
-        if (file !== "base.ts") {
-            const model = await import("../controllers/" + file.replace(".ts", ""));
+        if (file !== 'base.ts') {
+            const model = await import('../controllers/' + file.replace('.ts', ''));
             const keys = Object.keys(model);
             keys.forEach((k) => {
                 if (Object.getPrototypeOf(model[k]) === BaseController ||
@@ -26,16 +25,5 @@ async function createController() {
     });
     return router;
 }
-
-// router.get("/", (req, res) => {
-//     // const usr: User = new User();
-//     // usr.id = "5:0";
-//     // usr.load().then((a: User) => {
-//     //     console.log(a);
-//     // });
-//     // res.send("Hello World!");
-// }
-// );
-// router.use("/users", require("./users"));
 
 export default createController;

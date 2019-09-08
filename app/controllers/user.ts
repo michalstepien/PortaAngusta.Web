@@ -1,36 +1,40 @@
-import { Company } from "../models/company";
-import { User } from "../models/user";
-import { BaseController, Controller, Delete, Get, Post, Put } from "./base";
+import { Company } from '../models/company';
+import { User } from '../models/user';
+import { BaseController, Controller, Delete, Get, Post, Put, Description, Query, Param, Return } from './base';
 
-@Controller("users")
+
+@Controller('users')
 export class UserController extends BaseController {
 
-    @Get("user/:id")
-    public async getUser(id: string) {
+    @Description('Get one user from DB')
+    @Get('user/:id')
+    @Return(User)
+    public async getUser(@Param id: string): Promise<User> {
         const usr: User = new User();
         usr.id = id;
         const r = await usr.load();
         return r;
     }
 
-    @Get("all")
-    public async getUsers() {
+    @Description('Get all users from DB')
+    @Get('all')
+    public async getUsers(): Promise<User[]> {
         const usr: User = new User();
         const r = usr.loadAll();
         return r;
     }
 
-    @Delete("user/:id")
+    @Delete('user/:id')
     public async deleteUser(id: string) {
         return User.deleteById(id);
     }
 
-    @Put("user")
+    @Put('user')
     public async updateUser(id: string) {
         return User.deleteById(id);
     }
 
-    @Post("user")
+    @Post('user')
     public async createUser(user: User) {
         const usr: User = new User();
         const p = usr.importRecord(user);
@@ -39,14 +43,14 @@ export class UserController extends BaseController {
         return s;
     }
 
-    @Get("traverse")
+    @Get('traverse')
     public async traverse() {
         const usr: User = new User();
         const ret = await usr.traverseFromClass();
         return ret;
     }
 
-    @Get("traverse/:id")
+    @Get('traverse/:id')
     public async traverseById(id: string) {
         const usr: User = new User();
         usr.id = id;
@@ -54,10 +58,10 @@ export class UserController extends BaseController {
         return ret;
     }
 
-    @Get("company")
+    @Get('company')
     public async getCompany() {
         const c: Company = new Company();
-        c.id = "21:0";
+        c.id = '21:0';
         const r = await c.load();
         const d = await c.addressesList;
         // const ret = await r.mainAddress;

@@ -1,11 +1,11 @@
-import { Base, dbProperty, ModelClass } from "./base";
+import { Base, dbProperty, ModelClass } from './base';
 
-@ModelClass("ORole")
+@ModelClass('ORole')
 export class Role extends Base<Role> {
     @dbProperty()
-    public id: string = "";
+    public id = '';
     @dbProperty()
-    public name: string = "";
+    public name = '';
 
     constructor() {
         super(Role);

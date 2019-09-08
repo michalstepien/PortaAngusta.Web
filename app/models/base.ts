@@ -1,8 +1,7 @@
-import { stringify } from "querystring";
-import "reflect-metadata";
-import connection from "../db";
+import 'reflect-metadata';
+import connection from '../db';
 
-const dbPropertyMetadataKey = Symbol("dbProperty");
+const dbPropertyMetadataKey = Symbol('dbProperty');
 
 export enum dbTypes {
     /**
@@ -70,20 +69,6 @@ export function ModelClass(value: string) {
 
 export class Base<T> {
 
-    public static async  findById(id: string): Promise<any> {
-        const ses = await connection.ses();
-        return ses.record.get("#" + id);
-    }
-
-    public static async  deleteById(id: string): Promise<any> {
-        const ses = await connection.ses();
-        return ses.record.delete("#" + id);
-    }
-
-    public type: any;
-
-    public id: string;
-
     constructor(type: any) {
         this.type = type;
         return new Proxy(this, {
@@ -133,6 +118,20 @@ export class Base<T> {
         });
     }
 
+    public type: any;
+
+    public id: string;
+
+    public static async  findById(id: string): Promise<any> {
+        const ses = await connection.ses();
+        return ses.record.get('#' + id);
+    }
+
+    public static async  deleteById(id: string): Promise<any> {
+        const ses = await connection.ses();
+        return ses.record.delete('#' + id);
+    }
+
     public async loadAll(): Promise<T[]> {
         const ses = await connection.ses();
         const cls = await ses.class.get(metadataModel.model[this.constructor.name].dbClass);
@@ -162,9 +161,9 @@ export class Base<T> {
 
     public async load(): Promise<T> {
         const ses = await connection.ses();
-        const record = await ses.record.get("#" + this.id);
+        const record = await ses.record.get('#' + this.id);
         ses.close();
-        return this.importRecord(record, true);
+        return this.importRecord(record);
     }
 
     public async  delete(): Promise<T> {
@@ -205,7 +204,7 @@ export class Base<T> {
 
     // private
 
-    public importRecord(record: any, fromDB: boolean = false) {
+    public importRecord(record: any) {
         const model = metadataModel.model[this.constructor.name];
         if (record['@rid']) {
             this.id = record['@rid'].cluster + ':' + record['@rid'].position;
@@ -236,7 +235,7 @@ export class Base<T> {
                     const tmpSet = new Set();
                     if (record[k] && record[k].length > 0) {
                         record[k].forEach((r: any) => {
-                            const lnk = { id: r.cluster + ":" + r.position, _lz: true };
+                            const lnk = { id: r.cluster + ':' + r.position, _lz: true };
                             tmpSet.add(lnk);
                         });
                     }
@@ -245,8 +244,8 @@ export class Base<T> {
                     const tmpMap = new Map<string, any>();
                     if (record[k] && record[k].length > 0) {
                         record[k].forEach((r: any) => {
-                            const lnk = { id: r.cluster + ":" + r.position, _lz: true };
-                            tmpMap.set("", lnk);
+                            const lnk = { id: r.cluster + ':' + r.position, _lz: true };
+                            tmpMap.set('', lnk);
                         });
                     }
                     (this as any)[toImp[k].name] = tmpMap;
@@ -270,17 +269,17 @@ export class Base<T> {
     }
 
     public importAnyRecord(record: any): Base<any> {
-        const cls = metadataModel.dbAssociative[record["@class"]];
+        const cls = metadataModel.dbAssociative[record['@class']];
         if (!cls) {
-            throw new DbError("Cannot load db class:" + record["@class"] + ". Create model to this class.");
+            throw new DbError('Cannot load db class:' + record['@class'] + '. Create model to this class.');
         }
         const model = metadataModel.model[cls];
         const inst: Base<any> = new model.class();
-        if (record["@rid"]) {
-            inst.id = record["@rid"].cluster + ":" + record["@rid"].position;
+        if (record['@rid']) {
+            inst.id = record['@rid'].cluster + ':' + record['@rid'].position;
         }
         const toImp = model.propertiesImport;
-        const keysThis = Object.keys(toImp).filter((x: string) => x !== "id");
+        const keysThis = Object.keys(toImp).filter((x: string) => x !== 'id');
         keysThis.forEach((k) => {
             if (inst.hasOwnProperty(toImp[k])) {
                 (inst as any)[toImp[k]] = record[k];
@@ -289,9 +288,9 @@ export class Base<T> {
         return inst as Base<any>;
     }
 
-    public exportRecord(insert: boolean = true) {
+    public exportRecord() {
         const r: any = {};
-        const keys = Object.keys(this).filter((x: string) => x !== "id");
+        const keys = Object.keys(this).filter((x: string) => x !== 'id');
         const that: any = this;
         keys.forEach((k) => {
             const pr = Reflect.getMetadata(dbPropertyMetadataKey, this, k);

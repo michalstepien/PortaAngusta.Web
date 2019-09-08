@@ -2,17 +2,22 @@
   "compilerOptions": {
     "module": "commonjs",
     "esModuleInterop": true,
-    "target": "es6",
+    "allowSyntheticDefaultImports": true,
+    "target": "es2015",
     "noImplicitAny": true,
     "moduleResolution": "node",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+    
     "sourceMap": true,
     "allowJs": true,
     "outDir": "dist",
     "baseUrl": "./app",
     "incremental": true,
     "paths": {
+      "~/*": [
+        "app/*"
+      ],
       "*": [
         "node_modules/*"
       ]

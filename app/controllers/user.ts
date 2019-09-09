@@ -67,6 +67,7 @@ export class UserController extends BaseController {
         const r = await c.load();
         const d = await c.addressesList;
         const e = await c.addressesLinkset;
+        const f = await c.addressesMap;
         // const ret = await r.mainAddress;
         // const ret3 = await r.mainAddress;
         return c;

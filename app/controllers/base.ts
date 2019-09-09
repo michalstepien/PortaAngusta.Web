@@ -107,15 +107,16 @@ function getArguments(func: any): Array<any> {
     };
 
     try {
-        const ast = babel.parse('(\n function ' + func.toString() + '\n)', {plugins: ['typescript']});
+        const ast = babel.parse('\n ' + func.toString().replace('async', 'async function') + '\n', {plugins: ['typescript']});
         const program =  ast.program;
         const body: any = program.body[0];
-        const ret = body
-        .expression
-        .params
-        .map((node: any) => {
-            return node.name || maybe(node.left).name || '...' + maybe(node.argument).name;
-        });
+        const params = body.params;
+        let ret: any[] = [];
+        if (params) {
+            ret = params.map((node: any) => {
+                return node.name || maybe(node.left).name || '...' + maybe(node.argument).name;
+            });
+        }
         return ret;
     } catch (e) {
         console.log(e);

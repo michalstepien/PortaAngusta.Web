@@ -92,7 +92,6 @@ export class Base<T> {
                     }
                 } else if (ep.type === dbTypes.LinkList) {
                     const v: any [] = Reflect.get(target, name, receiver);
-                    console.log(v);
                     if (v.length > 0 && v[0]._lz) {
                         const cls = ep.class;
                         return target.loadProjection(ep.name, target.id).then((rPr: any) => {
@@ -127,6 +126,26 @@ export class Base<T> {
                                 const p: Base<typeof cls> = new ep.class();
                                 p.importRecord(e);
                                 target[name].add(p);
+                            });
+                            return Reflect.get(target, name, receiver);
+                        });
+                    } else {
+                        return Reflect.get(target, name, receiver);
+                    }
+                } else if (ep.type === dbTypes.LinkMap) {
+                    const v: Map<string, any> = Reflect.get(target, name, receiver);
+                    if (v.size > 0 && v.values().next().value._lz) {
+                        const cls = ep.class;
+                        return target.loadProjectionMap(ep.name, target.id).then((d: any) => {
+                            if ( d.values.length === 0 ) {
+                                target[name] = new Map<string, any>();
+                                return Reflect.get(target, name, receiver);
+                            }
+                            target[name] = new Map<string, any>();
+                            d.values.forEach((e: any, i: number) => {
+                                const p: Base<typeof cls> = new ep.class();
+                                p.importRecord(e);
+                                target[name].set(d.keys[i], e);
                             });
                             return Reflect.get(target, name, receiver);
                         });
@@ -264,10 +283,11 @@ export class Base<T> {
                     (this as any)[toImp[k].name] = tmpSet;
                 } else if (toImp[k].type === dbTypes.LinkMap) {
                     const tmpMap = new Map<string, any>();
-                    if (record[k] && record[k].length > 0) {
-                        record[k].forEach((r: any) => {
-                            const lnk = { id: r.cluster + ':' + r.position, _lz: true };
-                            tmpMap.set('', lnk);
+                    if (record[k]) {
+                        const keysLinkMap = Object.keys(record[k]);
+                        keysLinkMap.forEach((r: any) => {
+                            const lnk = { id: record[k][r].cluster + ':' + record[k][r].position, _lz: true };
+                            tmpMap.set(r, lnk);
                         });
                     }
                     (this as any)[toImp[k].name] = tmpMap;
@@ -330,6 +350,16 @@ export class Base<T> {
         const ret = await ses.select(name + ':{@rid,@class,*}').from('#' + id).one();
         ses.close();
         return ret;
+    }
+
+    private async loadProjectionMap(name: string, id: string): Promise<any> {
+        const ses = await connection.ses();
+        const retName = name + '.keys()';
+        const mapKeys = await ses.select(retName).from('#' + id).one();
+        const s = name + '[' + mapKeys[retName].map((x: string) =>  '"' + x + '"').join(',') + ']';
+        const ret = await ses.select(s + ':{@rid,@class,*}').from('#' + id).one();
+        ses.close();
+        return {keys: mapKeys[retName] || [], values: ret[s] || []};
     }
 }
 

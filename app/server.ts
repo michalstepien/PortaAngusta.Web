@@ -40,7 +40,10 @@ class App {
         this.app.set(
             'json replacer',
             ( key: any, value: any ) => {
-                if (typeof value === 'object' && value instanceof Set) {
+                if (typeof value === 'object' &&  value instanceof Map) {
+                    return Object.fromEntries(value);
+                }
+                if (typeof value === 'object' &&  value instanceof Set) {
                     return [...value];
                 }
                 return value;

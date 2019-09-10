@@ -91,12 +91,12 @@ export class Base<T> {
                         return Reflect.get(target, name, receiver);
                     }
                 } else if (ep.type === dbTypes.LinkList) {
-                    const v: any [] = Reflect.get(target, name, receiver);
+                    const v: any[] = Reflect.get(target, name, receiver);
                     if (v.length > 0 && v[0]._lz) {
                         const cls = ep.class;
                         return target.loadProjection(ep.name, target.id).then((rPr: any) => {
                             const d = rPr[ep.name];
-                            if ( d.length === 0 ) {
+                            if (d.length === 0) {
                                 target[name] = [];
                                 return Reflect.get(target, name, receiver);
                             }
@@ -117,7 +117,7 @@ export class Base<T> {
                         const cls = ep.class;
                         return target.loadProjection(ep.name, target.id).then((rPr: any) => {
                             const d = rPr[ep.name];
-                            if ( d.length === 0 ) {
+                            if (d.length === 0) {
                                 target[name] = new Set<any>();
                                 return Reflect.get(target, name, receiver);
                             }
@@ -137,7 +137,7 @@ export class Base<T> {
                     if (v.size > 0 && v.values().next().value._lz) {
                         const cls = ep.class;
                         return target.loadProjectionMap(ep.name, target.id).then((d: any) => {
-                            if ( d.values.length === 0 ) {
+                            if (d.values.length === 0) {
                                 target[name] = new Map<string, any>();
                                 return Reflect.get(target, name, receiver);
                             }
@@ -175,7 +175,7 @@ export class Base<T> {
 
     public async loadAll(): Promise<T[]> {
         const ses = await connection.ses();
-        const cls = await ses.class.get(metadataModel.model[this.constructor.name].dbClass);
+        const cls = await ses.class.get(this.dbClass());
         const lst = await cls.list().all();
         const elements: T[] = [];
         lst.forEach((element: any) => {
@@ -189,7 +189,7 @@ export class Base<T> {
 
     public async save(): Promise<T> {
         const ses = await connection.ses();
-        const cls = await ses.class.get(metadataModel.model[this.constructor.name].dbClass);
+        const cls = await ses.class.get(this.dbClass());
         try {
             const saved = await cls.create(this.exportRecord());
             ses.close();
@@ -221,9 +221,18 @@ export class Base<T> {
         return ret;
     }
 
+    public async liveQuery() {
+        const ses = await connection.ses();
+        return ses.liveQuery('select from ' + this.dbClass());
+    }
+
+    public dbClass() {
+        return metadataModel.model[this.constructor.name].dbClass;
+    }
+
     public async traverseFromClass(): Promise<Array<Base<any>>> {
         const ses = await connection.ses();
-        const tr = await ses.traverse().from(metadataModel.model[this.constructor.name].dbClass).all();
+        const tr = await ses.traverse().from(this.dbClass()).all();
         const ret: any = [];
         tr.forEach((el: any) => {
             ret.push(this.importAnyRecord(el));
@@ -356,10 +365,10 @@ export class Base<T> {
         const ses = await connection.ses();
         const retName = name + '.keys()';
         const mapKeys = await ses.select(retName).from('#' + id).one();
-        const s = name + '[' + mapKeys[retName].map((x: string) =>  '"' + x + '"').join(',') + ']';
+        const s = name + '[' + mapKeys[retName].map((x: string) => '"' + x + '"').join(',') + ']';
         const ret = await ses.select(s + ':{@rid,@class,*}').from('#' + id).one();
         ses.close();
-        return {keys: mapKeys[retName] || [], values: ret[s] || []};
+        return { keys: mapKeys[retName] || [], values: ret[s] || [] };
     }
 }
 

@@ -3,7 +3,12 @@ node_js:
  - "node"
 env:
  - CODECOV_TOKEN="cd04e9e7-26bd-4dc9-be7c-86e59b8c31c9"
-before_script: cd frontend
+ services:
+  - docker
+before_script:
+  - docker pull orientdb
+  - docker run -d --name orientdb -p 2424:2424 -p 2480:2480 -e ORIENTDB_ROOT_PASSWORD=rootpwd orientdb
+  - cd frontend
 script:
   - npm install
   - npm run lint

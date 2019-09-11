@@ -8,6 +8,8 @@ services:
 before_script:
   - docker pull orientdb
   - docker run -d --name orientdb -p 2424:2424 -p 2480:2480 -e ORIENTDB_ROOT_PASSWORD=rootpwd orientdb
+  - npm install orientjs -g
+  - orientjs db create portaangusta graph plocal
   - cd frontend
 script:
   - npm install

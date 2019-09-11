@@ -15,5 +15,6 @@ script:
   - npm run test-frontend
   - npm run build
   - cd ..
+  - npm run test
   - npm run build
   - npm run codecv

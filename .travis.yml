@@ -3,7 +3,7 @@ node_js:
  - "node"
 env:
  - CODECOV_TOKEN="cd04e9e7-26bd-4dc9-be7c-86e59b8c31c9"
- services:
+services:
   - docker
 before_script:
   - docker pull orientdb

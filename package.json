@@ -63,16 +63,28 @@
   "nyc": {
     "exclude-after-remap": false,
     "all": true,
+    "cache": false,
+    "require": [
+      "ts-node/register",
+      "source-map-support/register"
+    ],
+    "extension": [
+      ".ts",
+      ".tsx"
+    ],
     "reporter": [
       "html",
       "lcovonly",
       "text-summary"
     ],
     "exclude": [
+      "**/*.d.ts",
       "frontend/**",
       "migrations/**",
       "coverage/**",
-      "test/**"
+      "test/**",
+      "dist/**",
+      "**/node_modules/**"
     ]
   }
 }

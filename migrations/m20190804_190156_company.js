@@ -7,7 +7,12 @@ exports.up = function (db) {
       function (Company) {
         console.log('Created Company class');
         return Company.property.create([
-          { name: 'Name', type: 'String' }
+          { name: 'name', type: 'String' },
+          { name: 'addressEmbeded', type: 'Embedded', linkedClass: 'Address' },
+          { name: 'addressesLinkset', type: 'LinkSet', linkedClass: 'Address' },
+          { name: 'addressesList', type: 'LinkList', linkedClass: 'Address' },
+          { name: 'addressesMap', type: 'LinkMap', linkedClass: 'Address' },
+          { name: 'mainAddress', type: 'Link', linkedClass: 'Address' }
         ]).then(
           function (property) {
           }

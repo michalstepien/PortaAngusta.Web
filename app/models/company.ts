@@ -1,8 +1,9 @@
 import { Address } from './address';
+import { LogDate } from './logDate';
 import { Base, dbProperty, dbTypes, ModelClass } from './base';
 
 @ModelClass('Company')
-export class Company extends Base<Company> {
+export class Company extends LogDate<Company> {
 
     @dbProperty()
     public id = '';

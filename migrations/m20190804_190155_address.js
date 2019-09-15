@@ -7,12 +7,12 @@ exports.up = function (db) {
       function (Address) {
         console.log('Created Address class');
         return Address.property.create([
-          { name: 'Country', type: 'String' },
-          { name: 'City', type: 'String' },
-          { name: 'StreetName', type: 'String' },
-          { name: 'StreetNumber', type: 'String' },
-          { name: 'PostalCode', type: 'String' },
-          { name: 'Location', type: 'Embedded', linkedType: 'OPOint' }
+          { name: 'country', type: 'String' },
+          { name: 'city', type: 'String' },
+          { name: 'streetName', type: 'String' },
+          { name: 'streetNumber', type: 'String' },
+          { name: 'postalCode', type: 'String' },
+          { name: 'location', type: 'Embedded', linkedType: 'OPOint' }
         ]).then(
           function (property) {
            

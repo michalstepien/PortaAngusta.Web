@@ -7,7 +7,7 @@ export class Address extends Base<Address> {
     public id = '';
 
     @dbProperty()
-    public City = '';
+    public city = '';
 
     constructor() {
         super(Address);

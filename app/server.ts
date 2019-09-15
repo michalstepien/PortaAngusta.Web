@@ -92,7 +92,7 @@ class App {
         if (this.lq) {
             this.lq.unsubscribeAll();
         }
-        process.exit(1);
+        process.exit(0);
     }
 
     private configPasport() {

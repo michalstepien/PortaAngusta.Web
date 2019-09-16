@@ -92,7 +92,7 @@ export class Base<T> {
                     }
                 } else if (ep.type === dbTypes.LinkList) {
                     const v: any[] = Reflect.get(target, name, receiver);
-                    if (v.length > 0 && v[0]._lz) {
+                    if (v && v.length > 0 && v[0]._lz) {
                         const cls = ep.class;
                         return target.loadProjection(ep.name, target.id).then((rPr: any) => {
                             const d = rPr[ep.name];
@@ -113,7 +113,7 @@ export class Base<T> {
                     }
                 } else if (ep.type === dbTypes.LinkSet) {
                     const v: Set<any> = Reflect.get(target, name, receiver);
-                    if (v.size > 0 && v.values().next().value._lz) {
+                    if (v && v.size > 0 && v.values().next().value._lz) {
                         const cls = ep.class;
                         return target.loadProjection(ep.name, target.id).then((rPr: any) => {
                             const d = rPr[ep.name];
@@ -134,7 +134,7 @@ export class Base<T> {
                     }
                 } else if (ep.type === dbTypes.LinkMap) {
                     const v: Map<string, any> = Reflect.get(target, name, receiver);
-                    if (v.size > 0 && v.values().next().value._lz) {
+                    if (v && v.size > 0 && v.values().next().value._lz) {
                         const cls = ep.class;
                         return target.loadProjectionMap(ep.name, target.id).then((d: any) => {
                             if (d.values.length === 0) {
@@ -189,12 +189,15 @@ export class Base<T> {
 
     public async save(): Promise<T> {
         const ses = await connection.ses();
-        const cls = await ses.class.get(this.dbClass());
         try {
-            const saved = await cls.create(this.exportRecord());
+            const expR = this.exportRecord(this.constructor.name, null);
+            const saved = await ses.command('INSERT INTO ' + this.dbClass() + ' CONTENT :va', { params: { va: expR}}).one();
+            console.log(saved);
+            this.importRecord(saved);
             ses.close();
             return saved;
         } catch (error) {
+            console.error(error);
             return { error: false } as any;
         }
 
@@ -330,7 +333,7 @@ export class Base<T> {
             inst.id = record['@rid'].cluster + ':' + record['@rid'].position;
         }
         const toImp = model.propertiesImport;
-        const keysThis = Object.keys(toImp).filter((x: string) => x !== 'id');
+        const keysThis = Object.keys(toImp).filter((x: string) => x !== 'id' && x !== 'type');
         keysThis.forEach((k) => {
             if (inst.hasOwnProperty(toImp[k])) {
                 (inst as any)[toImp[k]] = record[k];
@@ -339,14 +342,44 @@ export class Base<T> {
         return inst as Base<any>;
     }
 
-    public exportRecord() {
+    public exportRecord(className: string, record: any) {
+        const model = metadataModel.model[className];
+        const toExport = model.propertiesExport;
         const r: any = {};
-        const keys = Object.keys(this).filter((x: string) => x !== 'id');
-        const that: any = this;
+        const keys = Object.keys(toExport).filter((x: string) => x !== 'id' && x !== 'type');
+        const that: any = record || this;
         keys.forEach((k) => {
-            const pr = Reflect.getMetadata(dbPropertyMetadataKey, this, k);
-            if (pr) {
-                r[pr] = that[k];
+            if (toExport[k].type === dbTypes.Link) {
+                if (that[k]) {
+
+                } else {
+                    r[k] = null;
+                }
+            } else if (toExport[k].type === dbTypes.LinkList) {
+                if (that[k]) {
+
+                } else {
+                    r[k] = [];
+                }
+            } else if (toExport[k].type === dbTypes.LinkSet) {
+                if (that[k]) {
+                    r[k] = [...that[k]];
+                } else {
+                    r[k] = [];
+                }
+            } else if (toExport[k].type === dbTypes.LinkMap) {
+                if (that[k]) {
+
+                } else {
+                    r[k] = {};
+                }
+            } else if (toExport[k].type === dbTypes.Embedded) {
+                if (that[k]) {
+                    const m = new toExport[k].class();
+                    r[k] = this.exportRecord(m.dbClass(), that[k]);
+                } else {
+                    that[k] = {};
+                }
             } else {
                 r[k] = that[k];
             }

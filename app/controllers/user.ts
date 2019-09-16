@@ -1,4 +1,5 @@
 import { Company } from '../models/company';
+import { Address } from '../models/address';
 import { User } from '../models/user';
 import { BaseController, Controller, Delete, Get, Post, Put, Description, Query, Param, Return } from './base';
 
@@ -68,9 +69,39 @@ export class UserController extends BaseController {
         const d = await c.addressesList;
         const e = await c.addressesLinkset;
         const f = await c.addressesMap;
+        return c;
+    }
 
-        // const ret = await r.mainAddress;
-        // const ret3 = await r.mainAddress;
+    @Get('companysave')
+    @Description('Save company')
+    @Return(Company)
+    public async saveCompany() {
+        const c: Company = new Company();
+        c.name = 'test company';
+        await c.save();
+        return c;
+    }
+
+    @Get('addresssave')
+    @Description('Save address')
+    @Return(Company)
+    public async saveAddress() {
+        const c: Address = new Address();
+        c.city = 'Zławieś';
+        await c.save();
+        return c;
+    }
+
+    @Get('companysaveembeded')
+    @Description('Save company embbeded')
+    @Return(Company)
+    public async saveCompanyLink() {
+        const c: Company = new Company();
+        c.name = 'test company Embeded4';
+        const a: Address = new Address();
+        a.city = 'Toruń';
+        c.addressEmbeded = a;
+        await c.save();
         return c;
     }
 }

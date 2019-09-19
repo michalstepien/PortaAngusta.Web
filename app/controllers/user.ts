@@ -176,6 +176,31 @@ export class UserController extends BaseController {
 
         c.addressesMap = new Map<string, Address>([ ['dupa1', a], ['dupa2', b]]);
         await c.save();
+        await c.addressesMap;
         return c;
+    }
+
+    @Get('adresupdate')
+    @Description('Save adres update')
+    @Return(Address)
+    public async saveAdresUpdate() {
+        const a: Address = new Address();
+        a.city = 'Skludzewo';
+        await a.save();
+
+        a.city = 'Siemon';
+        await a.save();
+        return a;
+    }
+
+    @Get('adresdelete')
+    @Description('DeleteAdres')
+    @Return(Address)
+    public async deleteAdres() {
+        const a: Address = new Address();
+        a.city = 'Cichoradz';
+        await a.save();
+        const ret = await a.delete();
+        return ret;
     }
 }

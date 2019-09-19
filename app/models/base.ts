@@ -134,7 +134,7 @@ export class Base<T> {
                     }
                 } else if (ep.type === dbTypes.LinkMap) {
                     const v: Map<string, any> = Reflect.get(target, name, receiver);
-                    if (v && v.size > 0 && v.values().next().value._lz) {
+                    if (v && v.size > 0 && v.values().next().value._lz && target.id) {
                         const cls = ep.class;
                         return target.loadProjectionMap(ep.name, target.id).then((d: any) => {
                             if (d.values.length === 0) {
@@ -191,9 +191,13 @@ export class Base<T> {
         const ses = await connection.ses();
         try {
             const expR = this.exportRecord(this.constructor.name, null);
+            const command = (!this.id ? 'INSERT INTO ' : 'UPDATE ');
+            const where = (this.id ? ' WHERE @rid=' + this.id : '');
             // cant save with params
-            const saved = await ses.command('INSERT INTO ' + this.dbClass() + ' CONTENT ' + JSON.stringify(expR)).one();
-            this.importRecord(saved);
+            const saved = await ses.command(command + this.dbClass() + ' CONTENT ' + JSON.stringify(expR) + where).one();
+            if (!this.id) {
+                this.importRecord(saved);
+            }
             ses.close();
             return saved;
         } catch (error) {
@@ -211,13 +215,6 @@ export class Base<T> {
     }
 
     public async  delete(): Promise<T> {
-        const ses = await connection.ses();
-        const ret = ses.record.delete('#' + this.id);
-        ses.close();
-        return ret;
-    }
-
-    public async  update(): Promise<T> {
         const ses = await connection.ses();
         const ret = ses.record.delete('#' + this.id);
         ses.close();

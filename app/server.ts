@@ -72,7 +72,6 @@ class App {
         const c = new Company();
         await this.lq.subscribe(c);
         this.lq.on(c, (data: any) => {
-            console.log(data);
         });
     }
 

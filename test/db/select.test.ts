@@ -4,8 +4,8 @@ import { User } from '../../app/models/user';
 const expect = chai.expect;
 
 describe('User', () => {
-    describe('#constructor()', () => {
-        it('requires two numerical arguments', () => {
+    describe('loadAll()', () => {
+        it('first admin', () => {
             const usrs = new User();
             return usrs.loadAll()
               .then((u) => {

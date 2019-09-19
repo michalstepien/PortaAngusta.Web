@@ -12,16 +12,16 @@ export class Company extends LogDate<Company> {
     public name = '';
 
     @dbProperty(null, dbTypes.Link, Address)
-    public mainAddress: Promise<Address> = null;
+    public mainAddress: Promise<Address> | Address = null;
 
     @dbProperty(null, dbTypes.LinkList, Address)
-    public addressesList: Promise<Address[]> = [] as any;
+    public addressesList: Promise<Address[]> | Address[] = new Array<Address>();
 
     @dbProperty(null, dbTypes.LinkSet, Address)
-    public addressesLinkset: Promise<Set<Address>> = [] as any;
+    public addressesLinkset: Promise<Set<Address>> | Set<Address> = new Set<Address>();
 
     @dbProperty(null, dbTypes.LinkMap, Address)
-    public addressesMap: Promise<Map<string, Address>> = null;
+    public addressesMap: Promise<Map<string, Address>> | Map<string, Address> = new Map<string, Address>();
 
     @dbProperty(null, dbTypes.Embedded, Address)
     public addressEmbeded: Address = null;

@@ -95,12 +95,86 @@ export class UserController extends BaseController {
     @Get('companysaveembeded')
     @Description('Save company embbeded')
     @Return(Company)
-    public async saveCompanyLink() {
+    public async saveCompanyEmbeded() {
         const c: Company = new Company();
         c.name = 'test company Embeded4';
         const a: Address = new Address();
         a.city = 'Toruń';
         c.addressEmbeded = a;
+        await c.save();
+        return c;
+    }
+
+    @Get('companysavelink')
+    @Description('Save company link')
+    @Return(Company)
+    public async saveCompanyLink() {
+        const c: Company = new Company();
+        c.name = 'test company link';
+        const a: Address = new Address();
+        a.city = 'Fordon';
+        await a.save();
+        c.mainAddress = a;
+        await c.save();
+        return c;
+    }
+
+    @Get('companysavelinkset')
+    @Description('Save company linkset')
+    @Return(Company)
+    public async saveCompanyLinkSet() {
+        const a: Address = new Address();
+        a.city = 'Fordon11';
+        await a.save();
+
+        const b: Address = new Address();
+        b.city = 'Fordon22';
+        await b.save();
+
+        const c: Company = new Company();
+        c.name = 'test company linkSET';
+
+        c.addressesLinkset = new Set<Address>([a, b]);
+        await c.save();
+        return c;
+    }
+
+    @Get('companysavelinklist')
+    @Description('Save company linklist')
+    @Return(Company)
+    public async saveCompanyLinkList() {
+        const a: Address = new Address();
+        a.city = 'Fordon11 LIST';
+        await a.save();
+
+        const b: Address = new Address();
+        b.city = 'Fordon22 LIST';
+        await b.save();
+
+        const c: Company = new Company();
+        c.name = 'test company LIST';
+
+        c.addressesList = [a, b];
+        await c.save();
+        return c;
+    }
+
+    @Get('companysavelinkmap')
+    @Description('Save company linkmap')
+    @Return(Company)
+    public async saveCompanyLinkMap() {
+        const a: Address = new Address();
+        a.city = 'Fordon11 MAP';
+        await a.save();
+
+        const b: Address = new Address();
+        b.city = 'Fordon22 MAP';
+        await b.save();
+
+        const c: Company = new Company();
+        c.name = 'test company MAP';
+
+        c.addressesMap = new Map<string, Address>([ ['dupa1', a], ['dupa2', b]]);
         await c.save();
         return c;
     }

@@ -191,8 +191,8 @@ export class Base<T> {
         const ses = await connection.ses();
         try {
             const expR = this.exportRecord(this.constructor.name, null);
-            const saved = await ses.command('INSERT INTO ' + this.dbClass() + ' CONTENT :va', { params: { va: expR}}).one();
-            console.log(saved);
+            // cant save with params
+            const saved = await ses.command('INSERT INTO ' + this.dbClass() + ' CONTENT ' + JSON.stringify(expR)).one();
             this.importRecord(saved);
             ses.close();
             return saved;
@@ -342,6 +342,14 @@ export class Base<T> {
         return inst as Base<any>;
     }
 
+    private parseID(id: string): any {
+        const x = id.split(':');
+        if (x.length > 0) {
+            return { cluster: x[0], position: x[1] };
+        }
+        return null;
+    }
+
     public exportRecord(className: string, record: any) {
         const model = metadataModel.model[className];
         const toExport = model.propertiesExport;
@@ -350,26 +358,30 @@ export class Base<T> {
         const that: any = record || this;
         keys.forEach((k) => {
             if (toExport[k].type === dbTypes.Link) {
-                if (that[k]) {
-
+                if (that[k] && that[k].id) {
+                    r[k] = { '@rid': this.parseID(that[k].id) };
                 } else {
                     r[k] = null;
                 }
             } else if (toExport[k].type === dbTypes.LinkList) {
                 if (that[k]) {
-
+                    r[k] = that[k].map((e: any) => ({'@rid': '#' + e.id}));
                 } else {
                     r[k] = [];
                 }
             } else if (toExport[k].type === dbTypes.LinkSet) {
                 if (that[k]) {
-                    r[k] = [...that[k]];
+                    r[k] = [...that[k]].map((e: any) => ({'@rid': '#' + e.id}));
                 } else {
                     r[k] = [];
                 }
             } else if (toExport[k].type === dbTypes.LinkMap) {
                 if (that[k]) {
-
+                    const p: any = {};
+                    that[k].forEach((val: any, key: any) => {
+                        p[key] = {'@rid': '#' + val.id };
+                    });
+                    r[k] = p;
                 } else {
                     r[k] = {};
                 }

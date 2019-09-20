@@ -1,6 +1,7 @@
 import { Company } from '../models/company';
 import { Address } from '../models/address';
 import { User } from '../models/user';
+import { Jdg } from '../clusters/jdg';
 import { BaseController, Controller, Delete, Get, Post, Put, Description, Query, Param, Return } from './base';
 
 
@@ -202,5 +203,15 @@ export class UserController extends BaseController {
         await a.save();
         const ret = await a.delete();
         return ret;
+    }
+
+    @Get('addcompanycluster')
+    @Description('Company cluster jdg')
+    @Return(Company)
+    public async companyCluster() {
+        const a: Company = new Company();
+        a.name = 'Stepien LTD';
+        await a.save(new Jdg());
+        return a;
     }
 }

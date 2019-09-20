@@ -29,4 +29,5 @@ export class Company extends LogDate<Company> {
     constructor() {
         super(Company);
     }
+
 }

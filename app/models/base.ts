@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 import connection from '../db';
+import Cluster from '../clusters/base';
 
 const dbPropertyMetadataKey = Symbol('dbProperty');
 
@@ -164,16 +165,20 @@ export class Base<T> {
     public id: string;
 
     public static async  findById(id: string): Promise<any> {
+        // TO DO: change to command
         const ses = await connection.ses();
         return ses.record.get('#' + id);
     }
 
     public static async  deleteById(id: string): Promise<any> {
+        // TO DO: change to command
         const ses = await connection.ses();
         return ses.record.delete('#' + id);
     }
 
     public async loadAll(): Promise<T[]> {
+        // TO DO: change to command
+        // TO DO: add loadCluster
         const ses = await connection.ses();
         const cls = await ses.class.get(this.dbClass());
         const lst = await cls.list().all();
@@ -187,14 +192,16 @@ export class Base<T> {
         return elements;
     }
 
-    public async save(): Promise<T> {
+    public async save(cluster?: Cluster): Promise<T> {
         const ses = await connection.ses();
         try {
             const expR = this.exportRecord(this.constructor.name, null);
             const command = (!this.id ? 'INSERT INTO ' : 'UPDATE ');
             const where = (this.id ? ' WHERE @rid=' + this.id : '');
+            const clstr = (cluster ? ' CLUSTER ' + cluster.name : '');
+            const cmd = command + this.dbClass() + clstr + ' CONTENT ' + JSON.stringify(expR) + where;
             // cant save with params
-            const saved = await ses.command(command + this.dbClass() + ' CONTENT ' + JSON.stringify(expR) + where).one();
+            const saved = await ses.command(cmd).one();
             if (!this.id) {
                 this.importRecord(saved);
             }
@@ -208,6 +215,8 @@ export class Base<T> {
     }
 
     public async load(): Promise<T> {
+        // TO DO: change to command
+        // TO DO: dont throw No such record
         const ses = await connection.ses();
         const record = await ses.record.get('#' + this.id);
         ses.close();
@@ -215,6 +224,7 @@ export class Base<T> {
     }
 
     public async  delete(): Promise<T> {
+        // TO DO: change to command
         const ses = await connection.ses();
         const ret = ses.record.delete('#' + this.id);
         ses.close();

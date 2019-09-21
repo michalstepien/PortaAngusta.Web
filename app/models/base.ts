@@ -425,18 +425,22 @@ export class Base<T> {
     }
 
     public collection(): Collection<T> {
-        return new Collection<T>(this.dbClass(), async (cmd: string) => {
+        return new Collection<T>(this.dbClass(), async (cmd: string, projection: boolean) => {
             console.log(cmd);
             const ses = await connection.ses();
             const qret = await ses.command(cmd).all();
-            const elements: T[] = [];
-            qret.forEach((element: any) => {
-                const a: any = new this.type();
-                a.importRecord(element, true);
-                elements.push(a);
-            });
             ses.close();
-            return elements;
+            if (projection) {
+                return qret;
+            } else {
+                const elements: T[] = [];
+                qret.forEach((element: any) => {
+                    const a: any = new this.type();
+                    a.importRecord(element, true);
+                    elements.push(a);
+                });
+                return elements;
+            }
         });
     }
 }

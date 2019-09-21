@@ -2,13 +2,32 @@ import * as ts from 'typescript';
 
 export default class Collection<T> {
     private className: string;
-    private executionFunction: (cmd: string) => Promise<T> | Promise<T[]>;
-
+    private executionFunction: (cmd: string, projection: boolean) => Promise<T> | Promise<T[]>;
+    private isCount: boolean;
+    private skipNumber: number;
+    private limitNumber: number;
     private selectQuery: (t: T) => any;
     private whereQuery: (t: T) => boolean;
     private orderByQuery: (t: T) => any;
+    private groupByQuery: (t: T) => any;
+    private countFunct: (t: T) => any;
+    private varianceFunct: (t: T) => any;
+    private modeFunct: (t: T) => any;
+    private medianFunct: (t: T) => any;
+    private percentileFunct: (t: T) => any;
+    private absFunct: (t: T) => any;
+    private avgFunct: (t: T) => any;
+    private distinctFunct: (t: T) => any;
+    private sumFunct: (t: T) => any;
+    private minFunct: (t: T) => any;
+    private maxFunct: (t: T) => any;
+    private firstFunct: (t: T) => any;
+    private lastFunct: (t: T) => any;
+    private expandFunct: (t: T) => any;
+    private outFunct: (t: T) => any;
+    private inFunct: (t: T) => any;
 
-    constructor(classn: string, executefn: (cmd: string) => Promise<T> | Promise<T[]>) {
+    constructor(classn: string, executefn: (cmd: string, projection: boolean) => Promise<T> | Promise<T[]>) {
         this.className = classn;
         this.executionFunction = executefn;
     }
@@ -23,32 +42,103 @@ export default class Collection<T> {
         return this;
     }
 
+    public groupBy(query: (t: T) => any): Collection<T> {
+        this.groupByQuery = query;
+        return this;
+    }
+
     public select(query: (t: T) => any): Collection<T> {
         this.selectQuery = query;
         return this;
     }
 
-    public execute(): Promise<T> | Promise<T[]> {
-       return this.executionFunction(this.getSql());
+    public sum(query: (t: T) => any): Collection<T> {
+        this.sumFunct = query;
+        return this;
     }
+
+    public min(query: (t: T) => any): Collection<T> {
+        this.minFunct = query;
+        return this;
+    }
+
+    public max(query: (t: T) => any): Collection<T> {
+        this.maxFunct = query;
+        return this;
+    }
+
+    public distinct(query: (t: T) => any): Collection<T> {
+        this.distinctFunct = query;
+        return this;
+    }
+
+    public count(query?: (t: T) => any ): Collection<T> {
+        if (query) {
+            this.countFunct = query;
+        } else {
+            this.isCount = true;
+        }
+        return this;
+    }
+
+    public skip(skip: number): Collection<T> {
+        this.skipNumber = skip;
+        return this;
+    }
+
+    public limit(limit: number): Collection<T> {
+        this.limitNumber = limit;
+        return this;
+    }
+
+    public execute(): Promise<T> | Promise<T[]> {
+       return this.executionFunction(this.getSql(), false);
+    }
+
+    public executeProjection(): any {
+        return this.executionFunction(this.getSql(), true);
+     }
 
     private getSql(): string {
         let selectString = this.queryToSql(this.selectQuery);
         const whereString = this.queryToSql(this.whereQuery);
         const orderByString = this.queryToSql(this.orderByQuery);
+        const groupByString = this.queryToSql(this.groupByQuery);
+        const countString = this.queryToSql(this.countFunct);
 
         if (selectString.length === 0) {
             selectString = '*';
         }
 
+        if (this.isCount) {
+            selectString = ' COUNT(*) ';
+        }
+
+        if (countString.length > 0) {
+            if (selectString === '') {
+                throw(new Error('Cannot count without '));
+            }
+            selectString = selectString + ', COUNT(' + countString + ') AS count';
+        }
+
         let ret =  'SELECT ' + selectString + ' FROM ' + this.className + ' ';
 
         if (whereString.length > 0) {
-            ret += 'WHERE ' + whereString + '\n';
+            ret += ' WHERE ' + whereString;
         }
         if (orderByString.length > 0) {
-            ret += 'ORDER BY ' + orderByString;
+            ret += ' ORDER BY ' + orderByString;
         }
+        if (groupByString.length > 0) {
+            ret += ' GROUP BY ' + groupByString;
+        }
+        if (this.skipNumber) {
+            ret += ' SKIP ' + this.skipNumber;
+        }
+        if (this.limitNumber) {
+            ret += ' LIMIT ' + this.limitNumber;
+        }
+
         return ret;
     }
 

@@ -221,7 +221,8 @@ export class UserController extends BaseController {
     public async linq() {
 
         const a: Company = new Company();
-        const ret = await a.collection().where((t: Company) => t.name === 'test company' || t.name === 'test2').execute();
-        return ret;
+        const ret = await a.collection().where((t) => t.name === 'test company' || t.name === 'test2').limit(1).execute();
+        const ret2 = await a.collection().select((t) => t.name).count((t) => t.name).groupBy((t) => t.name).executeProjection();
+        return {normal: ret, groupby: ret2} ;
     }
 }

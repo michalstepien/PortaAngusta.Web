@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 import connection from '../db';
 import Cluster from '../clusters/base';
+import Collection from '../core/linq';
 
 const dbPropertyMetadataKey = Symbol('dbProperty');
 
@@ -421,6 +422,22 @@ export class Base<T> {
         const ret = await ses.select(s + ':{@rid,@class,*}').from('#' + id).one();
         ses.close();
         return { keys: mapKeys[retName] || [], values: ret[s] || [] };
+    }
+
+    public collection(): Collection<T> {
+        return new Collection<T>(this.dbClass(), async (cmd: string) => {
+            console.log(cmd);
+            const ses = await connection.ses();
+            const qret = await ses.command(cmd).all();
+            const elements: T[] = [];
+            qret.forEach((element: any) => {
+                const a: any = new this.type();
+                a.importRecord(element, true);
+                elements.push(a);
+            });
+            ses.close();
+            return elements;
+        });
     }
 }
 

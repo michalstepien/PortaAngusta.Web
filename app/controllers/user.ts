@@ -214,4 +214,14 @@ export class UserController extends BaseController {
         await a.save(new Jdg());
         return a;
     }
+
+    @Get('linq')
+    @Description('linqu example')
+    @Return(Company)
+    public async linq() {
+
+        const a: Company = new Company();
+        const ret = await a.collection().where((t: Company) => t.name === 'test company' || t.name === 'test2').execute();
+        return ret;
+    }
 }

@@ -2,7 +2,7 @@ import * as ts from 'typescript';
 
 export default class Collection<T> {
     private className: string;
-    private executionFunction: (cmd: string, projection: boolean) => Promise<T> | Promise<T[]>;
+    private executionFunction: (cmd: string, projection: boolean, oneRecord: boolean) => Promise<T> | Promise<T[]>;
     private isCount: boolean;
     private skipNumber: number;
     private limitNumber: number;
@@ -27,7 +27,9 @@ export default class Collection<T> {
     private outFunct: (t: T) => any;
     private inFunct: (t: T) => any;
 
-    constructor(classn: string, executefn: (cmd: string, projection: boolean) => Promise<T> | Promise<T[]>) {
+    private oneRecord: boolean;
+
+    constructor(classn: string, executefn: (cmd: string, projection: boolean, oneRecord: boolean) => Promise<T> | Promise<T[]>) {
         this.className = classn;
         this.executionFunction = executefn;
     }
@@ -92,11 +94,11 @@ export default class Collection<T> {
     }
 
     public execute(): Promise<T> | Promise<T[]> {
-       return this.executionFunction(this.getSql(), false);
+       return this.executionFunction(this.getSql(), false, false);
     }
 
     public executeProjection(): any {
-        return this.executionFunction(this.getSql(), true);
+        return this.executionFunction(this.getSql(), true, this.isCount);
      }
 
     private getSql(): string {
@@ -111,7 +113,7 @@ export default class Collection<T> {
         }
 
         if (this.isCount) {
-            selectString = ' COUNT(*) ';
+            selectString = ' COUNT(*) as onerec';
         }
 
         if (countString.length > 0) {
@@ -155,6 +157,8 @@ export default class Collection<T> {
 
     private toSql(expr: ts.Node): string {
         switch (expr.kind) {
+            case ts.SyntaxKind.ArrayLiteralExpression:
+                break;
             case ts.SyntaxKind.PropertyAccessExpression:
                 const paExpr = expr as ts.PropertyAccessExpression;
                 const idObject = paExpr.expression as ts.Identifier;
@@ -216,10 +220,16 @@ export default class Collection<T> {
 
                     switch (cpaExpr.name.text) {
                         case 'toUpperCase':
-                            funcName = 'UPPER';
+                            funcName = 'toUpperCase()';
                             break;
                         case 'toLowerCase':
-                            funcName = 'LOWER';
+                            funcName = 'toLowerCase()';
+                            break;
+                        case 'size':
+                            funcName = 'size()';
+                            break;
+                        case 'lengthString':
+                            funcName = 'length()';
                             break;
                         case 'substring':
                             funcName = 'SUBSTRING';
@@ -229,7 +239,7 @@ export default class Collection<T> {
                             funcName = '[UndefinedFunction]';
                             break;
                     }
-                    return funcName + '(' + this.toSql(cpaExpr.expression) + args + ')';
+                    return this.toSql(cpaExpr.expression) + '.' + funcName;
                 }
                 break;
             case ts.SyntaxKind.ObjectLiteralExpression:

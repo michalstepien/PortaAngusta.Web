@@ -425,13 +425,17 @@ export class Base<T> {
     }
 
     public collection(): Collection<T> {
-        return new Collection<T>(this.dbClass(), async (cmd: string, projection: boolean) => {
+        return new Collection<T>(this.dbClass(), async (cmd: string, projection: boolean, oneRecord: boolean) => {
             console.log(cmd);
             const ses = await connection.ses();
             const qret = await ses.command(cmd).all();
             ses.close();
             if (projection) {
-                return qret;
+                if (oneRecord) {
+                    return qret[0].onerec;
+                } else {
+                    return qret;
+                }
             } else {
                 const elements: T[] = [];
                 qret.forEach((element: any) => {
@@ -456,3 +460,21 @@ export class DbError extends Error {
         return { message: this.message, stack: this.stack, name: this.name };
     }
 }
+
+
+declare global {
+    interface Array<T> {
+        size(): number;
+    }
+    interface String {
+        lengthString(): number;
+    }
+}
+
+Array.prototype.size = function(): number {
+    return this.length;
+};
+
+String.prototype.lengthString = function(): number {
+    return this.length;
+};

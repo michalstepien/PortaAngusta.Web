@@ -175,7 +175,7 @@ export class UserController extends BaseController {
         const c: Company = new Company();
         c.name = 'test company MAP';
 
-        c.addressesMap = new Map<string, Address>([ ['dupa1', a], ['dupa2', b]]);
+        c.addressesMap = new Map<string, Address>([['dupa1', a], ['dupa2', b]]);
         await c.save();
         await c.addressesMap;
         return c;
@@ -221,8 +221,19 @@ export class UserController extends BaseController {
     public async linq() {
 
         const a: Company = new Company();
-        const ret = await a.collection().where((t) => t.name === 'test company' || t.name === 'test2').limit(1).execute();
+        const ret = await a.collection().where((t) => t.name === 'test company' || t.name === 'test2').execute();
+        const retCount = await a.collection().count().executeProjection();
+        const retSel = await a.collection().select((t) =>
+            ({
+                upper: t.name.toUpperCase(),
+                lower: t.name.toLowerCase(),
+                length: t.name.lengthString(),
+                size: (t.addressesList as Address[]).size()
+            }))
+            .limit(50).executeProjection();
         const ret2 = await a.collection().select((t) => t.name).count((t) => t.name).groupBy((t) => t.name).executeProjection();
-        return {normal: ret, groupby: ret2} ;
+        const ret3 = await a.collection().orderBy((t) => t.name).execute();
+        const ret4 = await a.collection().orderBy((t) => t.name).skip(2).limit(5).execute();
+        return { where: ret, count: retCount, retSel, groupby: ret2, orderby: ret3, skiplimit: ret4 };
     }
 }

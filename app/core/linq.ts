@@ -74,7 +74,7 @@ export default class Collection<T> {
         return this;
     }
 
-    public count(query?: (t: T) => any ): Collection<T> {
+    public count(query?: (t: T) => any): Collection<T> {
         if (query) {
             this.countFunct = query;
         } else {
@@ -94,12 +94,12 @@ export default class Collection<T> {
     }
 
     public execute(): Promise<T> | Promise<T[]> {
-       return this.executionFunction(this.getSql(), false, false);
+        return this.executionFunction(this.getSql(), false, false);
     }
 
     public executeProjection(): any {
         return this.executionFunction(this.getSql(), true, this.isCount);
-     }
+    }
 
     private getSql(): string {
         let selectString = this.queryToSql(this.selectQuery);
@@ -118,12 +118,12 @@ export default class Collection<T> {
 
         if (countString.length > 0) {
             if (selectString === '') {
-                throw(new Error('Cannot count without '));
+                throw (new Error('Cannot count without '));
             }
             selectString = selectString + ', COUNT(' + countString + ') AS count';
         }
 
-        let ret =  'SELECT ' + selectString + ' FROM ' + this.className + ' ';
+        let ret = 'SELECT ' + selectString + ' FROM ' + this.className + ' ';
 
         if (whereString.length > 0) {
             ret += ' WHERE ' + whereString;
@@ -146,7 +146,7 @@ export default class Collection<T> {
 
     private queryToSql(query: (t: T) => boolean): string {
         if (query) {
-            const src = ts.createSourceFile('test.ts', query.toString(), ts.ScriptTarget.ES2016, false);
+            const src = ts.createSourceFile('test.ts', query.toString(), ts.ScriptTarget.ES2018, false);
             const expr = src.statements[0] as ts.ExpressionStatement;
             const arrFunc = expr.expression as ts.ArrowFunction;
 
@@ -231,9 +231,60 @@ export default class Collection<T> {
                         case 'lengthString':
                             funcName = 'length()';
                             break;
+                        case 'trim':
+                            funcName = 'trim()';
+                            break;
+                        case 'type':
+                            funcName = 'type()';
+                            break;
+                        case 'replace':
+                            funcName = 'replace(' + cExpr.arguments.map(e => this.toSql(e)).join(', ') + ')';
+                            break;
+                        case 'append':
+                            funcName = 'append(' + cExpr.arguments.map(e => this.toSql(e)).join(', ') + ')';
+                            break;
                         case 'substring':
                             funcName = 'SUBSTRING';
                             args = ', ' + cExpr.arguments.map(e => this.toSql(e)).join(', ');
+                            break;
+                        case 'asBoolean':
+                            funcName = 'asBoolean()';
+                            break;
+                        case 'asDate':
+                            funcName = 'asDate()';
+                            break;
+                        case 'asDateTime':
+                            funcName = 'asDateTime()';
+                            break;
+                        case 'asDecimal':
+                            funcName = 'asDecimal()';
+                            break;
+                        case 'asFloat':
+                            funcName = 'asFloat()';
+                            break;
+                        case 'asInteger':
+                            funcName = 'asInteger()';
+                            break;
+                        case 'asList':
+                            funcName = 'asList()';
+                            break;
+                        case 'asLong':
+                            funcName = 'asLong()';
+                            break;
+                        case 'asString':
+                            funcName = 'asString()';
+                            break;
+                        case 'charAt':
+                            funcName = 'charAt()';
+                            break;
+                        case 'convert':
+                            funcName = 'convert(' + cExpr.arguments.map(e => this.toSql(e)).join(', ') + ')';
+                            break;
+                        case 'hash':
+                            funcName = 'hash()';
+                            break;
+                        case 'indexOf':
+                            funcName = 'indexOf(' + cExpr.arguments.map(e => this.toSql(e)).join(', ') + ')';
                             break;
                         default:
                             funcName = '[UndefinedFunction]';

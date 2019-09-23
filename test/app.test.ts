@@ -1,6 +1,5 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
-import * as mocha from 'mocha';
 import server from '../app/server';
 
 chai.use(chaiHttp);

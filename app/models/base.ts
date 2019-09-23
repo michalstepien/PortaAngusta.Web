@@ -469,6 +469,10 @@ declare global {
     interface String {
         lengthString(): number;
     }
+    interface Object {
+        type(): void;
+        hash(): string;
+    }
 }
 
 Array.prototype.size = function(): number {
@@ -477,4 +481,14 @@ Array.prototype.size = function(): number {
 
 String.prototype.lengthString = function(): number {
     return this.length;
+};
+
+// tslint:disable-next-line:only-arrow-functions
+Object.prototype.type = function() {
+    return null;
+};
+
+// tslint:disable-next-line:only-arrow-functions
+Object.prototype.hash = function() {
+    return null;
 };

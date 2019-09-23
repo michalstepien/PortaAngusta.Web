@@ -439,7 +439,6 @@ export class Base<T> {
 
     public collection(): Collection<T> {
         return new Collection<T>(this.dbClass(), async (cmd: string, projection: boolean, oneRecord: boolean) => {
-            console.log(cmd);
             const ses = await connection.ses();
             const qret = await ses.command(cmd).all();
             ses.close();

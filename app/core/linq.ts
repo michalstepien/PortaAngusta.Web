@@ -2,7 +2,7 @@ import * as ts from 'typescript';
 
 export default class Collection<T> {
     private className: string;
-    private executionFunction: (cmd: string, projection: boolean, oneRecord: boolean) => Promise<T> | Promise<T[]>;
+    private executionFunction: (cmd: string, projection: boolean, oneRecord: boolean) => Promise<T[]>;
     private isCount: boolean;
     private skipNumber: number;
     private limitNumber: number;
@@ -29,7 +29,7 @@ export default class Collection<T> {
 
     private oneRecord: boolean;
 
-    constructor(classn: string, executefn: (cmd: string, projection: boolean, oneRecord: boolean) => Promise<T> | Promise<T[]>) {
+    constructor(classn: string, executefn: (cmd: string, projection: boolean, oneRecord: boolean) => Promise<T[]>) {
         this.className = classn;
         this.executionFunction = executefn;
     }
@@ -93,7 +93,7 @@ export default class Collection<T> {
         return this;
     }
 
-    public execute(): Promise<T> | Promise<T[]> {
+    public execute(): Promise<T[]> {
         return this.executionFunction(this.getSql(), false, false);
     }
 

@@ -6,7 +6,7 @@ const expect = chai.expect;
 
 
 
-describe('MODEL', () => {
+describe('MODEL CREATE', () => {
     describe('save and load', () => {
         it('should name be equal', async () => {
             const c = new Company();

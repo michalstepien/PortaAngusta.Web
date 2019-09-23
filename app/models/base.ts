@@ -367,7 +367,7 @@ export class Base<T> {
         keys.forEach((k) => {
             if (toExport[k].type === dbTypes.Link) {
                 if (that[k] && that[k].id) {
-                    r[k] = { '@rid': this.parseID(that[k].id) };
+                    r[k] = { '@rid':  ({'@rid': '#' + that[k].id})};
                 } else {
                     r[k] = null;
                 }
@@ -474,21 +474,3 @@ declare global {
         hash(): string;
     }
 }
-
-Array.prototype.size = function(): number {
-    return this.length;
-};
-
-String.prototype.lengthString = function(): number {
-    return this.length;
-};
-
-// tslint:disable-next-line:only-arrow-functions
-Object.prototype.type = function() {
-    return null;
-};
-
-// tslint:disable-next-line:only-arrow-functions
-Object.prototype.hash = function() {
-    return null;
-};

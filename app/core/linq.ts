@@ -275,7 +275,7 @@ export default class Collection<T> {
                             funcName = 'asString()';
                             break;
                         case 'charAt':
-                            funcName = 'charAt()';
+                            funcName = 'charAt(' + cExpr.arguments.map(e => this.toSql(e)).join(', ') + ')';
                             break;
                         case 'convert':
                             funcName = 'convert(' + cExpr.arguments.map(e => this.toSql(e)).join(', ') + ')';

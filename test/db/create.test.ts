@@ -9,7 +9,6 @@ const expect = chai.expect;
 describe('Company', () => {
     describe('save', () => {
         it('save and load', async () => {
-            console.log('aaa');
             const c = new Company();
             c.name = 'TEST COMPANY';
             await c.save();
@@ -64,21 +63,21 @@ describe('Company', () => {
 
             const b = new Address();
             b.city = 'Toporzysko';
-            await a.save();
+            await b.save();
 
             const c = new Address();
             c.city = 'Siemoń';
-            await a.save();
+            await c.save();
 
             const d = new Company();
             d.name = 'TEST COMPANY LINKLIST';
             d.addressesList = [a, b, c];
-            await c.save();
+            await d.save();
 
             const e: Company = new Company();
-            e.id = c.id;
-            await d.load();
-            const f = await d.addressesList;
+            e.id = d.id;
+            await e.load();
+            const f = await e.addressesList;
 
             return expect(f.length).to.eql(3);
           });
@@ -92,21 +91,21 @@ describe('Company', () => {
 
             const b = new Address();
             b.city = 'Górsk';
-            await a.save();
+            await b.save();
 
             const c = new Address();
             c.city = 'Stanisławka';
-            await a.save();
+            await c.save();
 
             const d = new Company();
             d.name = 'TEST COMPANY LINKSET';
             d.addressesLinkset =  new Set([a, b, c]);
-            await c.save();
+            await d.save();
 
             const e: Company = new Company();
-            e.id = c.id;
-            await d.load();
-            const f = await d.addressesLinkset;
+            e.id = d.id;
+            await e.load();
+            const f = await e.addressesLinkset;
 
             return expect(f.size).to.eql(3);
           });

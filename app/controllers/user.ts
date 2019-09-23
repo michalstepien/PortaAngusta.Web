@@ -230,7 +230,7 @@ export class UserController extends BaseController {
                 length: t.name.lengthString(),
                 replace: t.name.replace('t', 'p'),
                 trim: t.name.trim(),
-                charAt: t.name.charAt(3),
+                charAt: t.name.charAt(0),
                 // indexof: t.name.indexOf('t', 0),
                 hash: t.name.hash(),
                 typeProp: t.name.type(),

@@ -188,7 +188,7 @@ export class Base<T> {
         const elements: T[] = [];
         lst.forEach((element: any) => {
             const a: any = new this.type();
-            a.importRecord(element, true);
+            a.importRecord(element);
             elements.push(a);
         });
         ses.close();
@@ -267,13 +267,16 @@ export class Base<T> {
 
     // private
 
-    public importRecord(record: any) {
-        const model = metadataModel.model[this.constructor.name];
-        if (record['@rid']) {
-            this.id = record['@rid'].cluster + ':' + record['@rid'].position;
-        }
-        if (record['@class'] !== model.dbClass) {
-            throw new DbError('Cannot load db class:' + record['@class'] + ' to: ' + this.constructor.name + 'model');
+    public importRecord(record: any, className: string = null) {
+        const clsName =  className || this.constructor.name;
+        const model = metadataModel.model[clsName];
+        if (!className) {
+            if (record['@rid']) {
+                this.id = record['@rid'].cluster + ':' + record['@rid'].position;
+            }
+            if (record['@class'] !== model.dbClass) {
+                throw new DbError('Cannot load db class:' + record['@class'] + ' to: ' + clsName + 'model');
+            }
         }
         const toImp = model.propertiesImport;
         const keysThis = Object.keys(toImp).filter((x: string) => x !== 'id');
@@ -329,6 +332,10 @@ export class Base<T> {
                 }
             }
         });
+
+        if (model.extendedClass && model.extendedClass !== 'Base') {
+           this.importRecord(record, model.extendedClass);
+        }
         return this as any;
     }
 
@@ -446,7 +453,7 @@ export class Base<T> {
                 const elements: T[] = [];
                 qret.forEach((element: any) => {
                     const a: any = new this.type();
-                    a.importRecord(element, true);
+                    a.importRecord(element);
                     elements.push(a);
                 });
                 return elements;

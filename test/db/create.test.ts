@@ -6,9 +6,9 @@ const expect = chai.expect;
 
 
 
-describe('Company', () => {
-    describe('save', () => {
-        it('save and load', async () => {
+describe('MODEL', () => {
+    describe('save and load', () => {
+        it('should name be equal', async () => {
             const c = new Company();
             c.name = 'TEST COMPANY';
             await c.save();
@@ -19,8 +19,8 @@ describe('Company', () => {
           });
     });
 
-    describe('save', () => {
-        it('save link', async () => {
+    describe('save link', () => {
+        it('should be city Zławieś Wielka', async () => {
             const a = new Address();
             a.city = 'Zławieś Wielka';
             await a.save();
@@ -38,8 +38,8 @@ describe('Company', () => {
           });
     });
 
-    describe('save', () => {
-        it('save embeded', async () => {
+    describe('save embeded', () => {
+        it('should be city Toruń', async () => {
             const a = new Address();
             a.city = 'Toruń';
 
@@ -55,8 +55,8 @@ describe('Company', () => {
           });
     });
 
-    describe('save', async () => {
-        it('save link list', async () => {
+    describe('save link list', async () => {
+        it('should be size 3', async () => {
             const a = new Address();
             a.city = 'Skłudzewo';
             await a.save();
@@ -83,8 +83,8 @@ describe('Company', () => {
           });
     });
 
-    describe('save', () => {
-        it('save link set', async () => {
+    describe('save link set', () => {
+        it('should be size 3', async () => {
             const a = new Address();
             a.city = 'Czarnowo';
             await a.save();
@@ -111,8 +111,8 @@ describe('Company', () => {
           });
     });
 
-    describe('save', () => {
-        it('save map', async () => {
+    describe('save map', () => {
+        it('should be size 3', async () => {
             const a = new Address();
             a.city = 'Czarnowo';
             await a.save();
@@ -136,6 +136,18 @@ describe('Company', () => {
             const f = await e.addressesMap;
 
             return expect(f.size).to.eql(3);
+          });
+    });
+
+    describe('save extended class', () => {
+        it('should be date', async () => {
+            const d = new Company();
+            d.name = 'TEST COMPANY Extended class';
+            await d.save();
+            const e: Company = new Company();
+            e.id = d.id;
+            await e.load();
+            return expect(e.createDate).to.eql(d.createDate);
           });
     });
 

@@ -61,9 +61,11 @@ export const metadataModel: any = {
 
 export function ModelClass(value: string) {
     return (constructor: any) => {
+        const extendedClass = Object.getPrototypeOf(constructor).name;
         const model = metadataModel.model[constructor.name] || {};
         model.dbClass = value;
         model.class = constructor;
+        model.extendedClass = extendedClass;
         metadataModel.model[constructor.name] = model;
         metadataModel.dbAssociative[value] = constructor.name;
     };
@@ -361,7 +363,7 @@ export class Base<T> {
     public exportRecord(className: string, record: any) {
         const model = metadataModel.model[className];
         const toExport = model.propertiesExport;
-        const r: any = {};
+        let r: any = {};
         const keys = Object.keys(toExport).filter((x: string) => x !== 'id' && x !== 'type');
         const that: any = record || this;
         keys.forEach((k) => {
@@ -404,6 +406,10 @@ export class Base<T> {
                 r[k] = that[k];
             }
         });
+
+        if (model.extendedClass && model.extendedClass !== 'Base') {
+            r = Object.assign(r, this.exportRecord(model.extendedClass, record));
+        }
         return r;
     }
 

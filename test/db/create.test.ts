@@ -111,4 +111,32 @@ describe('Company', () => {
           });
     });
 
+    describe('save', () => {
+        it('save map', async () => {
+            const a = new Address();
+            a.city = 'Czarnowo';
+            await a.save();
+
+            const b = new Address();
+            b.city = 'Górsk';
+            await b.save();
+
+            const c = new Address();
+            c.city = 'Stanisławka';
+            await c.save();
+
+            const d = new Company();
+            d.name = 'TEST COMPANY MAP';
+            d.addressesMap =  new Map([['dupa1', a], ['dupa2', b], ['dupa3', c]]);
+            await d.save();
+
+            const e: Company = new Company();
+            e.id = d.id;
+            await e.load();
+            const f = await e.addressesMap;
+
+            return expect(f.size).to.eql(3);
+          });
+    });
+
 });

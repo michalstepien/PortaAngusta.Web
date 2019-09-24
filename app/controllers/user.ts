@@ -234,7 +234,7 @@ export class UserController extends BaseController {
                 // indexof: t.name.indexOf('t', 0),
                 hash: t.name.hash(),
                 typeProp: t.name.type(),
-                size: (t.addressesList as Address[]).size()
+                size: t.addressesList.size()
             }))
             .limit(50).executeProjection();
         const ret2 = await a.collection().select((t) => t.name).count((t) => t.name).groupBy((t) => t.name).executeProjection();
@@ -242,4 +242,14 @@ export class UserController extends BaseController {
         const ret4 = await a.collection().orderBy((t) => t.name).skip(2).limit(5).execute();
         return { where: ret, count: retCount, retSel, groupby: ret2, orderby: ret3, skiplimit: ret4 };
     }
+
+    // @Get('linqfromlist')
+    // @Description('linqu from list example')
+    // @Return(Company)
+    // public async linqfromProjection() {
+
+    //     const a: Company = new Company();
+    //     const ret = await a.collection().where((t) => t.mainAddress.collection).execute();
+    //     return { where: ret };
+    // }
 }

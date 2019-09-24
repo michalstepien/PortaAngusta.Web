@@ -8,6 +8,7 @@ export default class Collection<T> {
     private limitNumber: number;
     private selectQuery: (t: T) => any;
     private whereQuery: (t: T) => boolean;
+    private luceneSearchIndexQuery: (t: T, isTrue?: boolean) => boolean;
     private orderByQuery: (t: T) => any;
     private groupByQuery: (t: T) => any;
     private countFunct: (t: T) => any;
@@ -36,6 +37,11 @@ export default class Collection<T> {
 
     public where(query: (t: T) => boolean): Collection<T> {
         this.whereQuery = query;
+        return this;
+    }
+
+    public luceneSearchIndex(query: (t: T) => boolean, isTrue: boolean = true): Collection<T> {
+        this.luceneSearchIndexQuery = query;
         return this;
     }
 
@@ -104,6 +110,7 @@ export default class Collection<T> {
     private getSql(): string {
         let selectString = this.queryToSql(this.selectQuery);
         const whereString = this.queryToSql(this.whereQuery);
+        const luceneSearchIndexString = this.queryToSql(this.luceneSearchIndexQuery);
         const orderByString = this.queryToSql(this.orderByQuery);
         const groupByString = this.queryToSql(this.groupByQuery);
         const countString = this.queryToSql(this.countFunct);
@@ -144,18 +151,17 @@ export default class Collection<T> {
         return ret;
     }
 
-    private queryToSql(query: (t: T) => boolean): string {
+    private queryToSql(query: (t: T) => boolean, lucene: boolean = false): string {
         if (query) {
             const src = ts.createSourceFile('test.ts', query.toString(), ts.ScriptTarget.ES2018, false);
             const expr = src.statements[0] as ts.ExpressionStatement;
             const arrFunc = expr.expression as ts.ArrowFunction;
-
-            return this.toSql(arrFunc.body);
+            return this.toSql(arrFunc.body, lucene);
         }
         return '';
     }
 
-    private toSql(expr: ts.Node): string {
+    private toSql(expr: ts.Node, lucene: boolean = false): string {
         switch (expr.kind) {
             case ts.SyntaxKind.ArrayLiteralExpression:
                 break;

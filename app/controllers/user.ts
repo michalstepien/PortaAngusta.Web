@@ -256,4 +256,13 @@ export class UserController extends BaseController {
                     .where((t) => t.addressesList.size() > 0).executeProjection();
         return { selectFromLink: ret , sizeCollection: ret2, selectFirst: ret3, selectFirstName: ret4};
     }
+
+    @Get('linqdelete')
+    @Description('linq delete example')
+    @Return(Company)
+    public async linqDelete() {
+        const a: Company = new Company();
+        const ret = await a.collection().where((t) => t.addressesList.size() > 40).delete();
+        return { howmDel: ret};
+    }
 }

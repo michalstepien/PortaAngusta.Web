@@ -458,6 +458,18 @@ export class Base<T> {
                 });
                 return elements;
             }
+        }, async (cmd: string) => {
+            const ses = await connection.ses();
+            console.log(cmd);
+            const qret = await ses.command(cmd).all();
+            ses.close();
+            return qret;
+        }, async (cmd: string) => {
+            const ses = await connection.ses();
+            console.log(cmd);
+            const qret = await ses.command(cmd).all();
+            ses.close();
+            return qret;
         });
     }
 }

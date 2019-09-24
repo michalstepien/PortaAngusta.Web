@@ -1,8 +1,16 @@
 import * as ts from 'typescript';
 
+enum sqlActionType {
+    select = 0,
+    delete = 1,
+    update = 2
+}
+
 export default class Collection<T> {
     private className: string;
     private executionFunction: (cmd: string, projection: boolean, oneRecord: boolean) => Promise<T[]>;
+    private deleteFunction: (cmd: string) => Promise<number>;
+    private updateFunction: (cmd: string) => Promise<number>;
     private isCount: boolean;
     private skipNumber: number;
     private limitNumber: number;
@@ -30,9 +38,15 @@ export default class Collection<T> {
 
     private oneRecord: boolean;
 
-    constructor(classn: string, executefn: (cmd: string, projection: boolean, oneRecord: boolean) => Promise<T[]>) {
+    constructor(classn: string,
+                executefn: (cmd: string, projection: boolean, oneRecord: boolean) => Promise<T[]>,
+                deletefn: (cmd: string) => Promise<number>,
+                updatefn: (cmd: string) => Promise<number>,
+                ) {
         this.className = classn;
         this.executionFunction = executefn;
+        this.deleteFunction = deletefn;
+        this.updateFunction = updatefn;
     }
 
     public where(query: (t: T) => boolean): Collection<T> {
@@ -107,7 +121,15 @@ export default class Collection<T> {
         return this.executionFunction(this.getSql(), true, this.isCount);
     }
 
-    private getSql(): string {
+    public delete(): Promise<number> {
+        return this.deleteFunction(this.getSql(sqlActionType.delete));
+    }
+
+    public update(m: T): Promise<number> {
+        return this.updateFunction(this.getSql(sqlActionType.update));
+    }
+
+    private getSql(action: sqlActionType = sqlActionType.select, m: T = null): string {
         let selectString = this.queryToSql(this.selectQuery);
         const whereString = this.queryToSql(this.whereQuery);
         const luceneSearchIndexString = this.queryToSql(this.luceneSearchIndexQuery);
@@ -130,7 +152,14 @@ export default class Collection<T> {
             selectString = selectString + ', COUNT(' + countString + ') AS count';
         }
 
-        let ret = 'SELECT ' + selectString + ' FROM ' + this.className + ' ';
+        let ret = '';
+        if (action === sqlActionType.select ) {
+            ret = 'SELECT ' + selectString + ' FROM ' + this.className + ' ';
+        } else if (action === sqlActionType.delete) {
+            ret = 'DELETE FROM ' + this.className + ' ';
+        } else if (action === sqlActionType.update) {
+            ret = 'UPDATE ' + this.className + ' SET CONTENT ';
+        }
 
         if (whereString.length > 0) {
             ret += ' WHERE ' + whereString;

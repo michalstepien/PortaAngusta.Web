@@ -167,8 +167,12 @@ export default class Collection<T> {
                 break;
             case ts.SyntaxKind.PropertyAccessExpression:
                 const paExpr = expr as ts.PropertyAccessExpression;
-                const idObject = paExpr.expression as ts.Identifier;
-                return paExpr.name.text;
+                const parent = paExpr.expression;
+                let t = '';
+                if ( parent && parent.kind !== ts.SyntaxKind.Identifier) {
+                    t = this.toSql(parent) + '.';
+                }
+                return t + paExpr.name.text;
             case ts.SyntaxKind.ParenthesizedExpression:
                 const parExpr = expr as ts.ParenthesizedExpression;
 
@@ -313,7 +317,17 @@ export default class Collection<T> {
                             return '[undefined]';
                     }
                 }).join(',\n');
+            case ts.SyntaxKind.ElementAccessExpression:
+                    const paExpr2 = expr as ts.ElementAccessExpression;
+                    const parent2 = paExpr2.expression;
+                    let t2 = '';
+                    if (parent2 && parent2.kind !== ts.SyntaxKind.Identifier) {
+                        t2 = this.toSql(parent2);
+                    }
+                    const n = paExpr2.argumentExpression as ts.NumericLiteral;
+                    return t2 + '[' + n.text + ']';
             default:
+                console.log(expr.kind);
                 return '[undefined]';
         }
     }

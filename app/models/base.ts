@@ -440,6 +440,7 @@ export class Base<T> {
     public collection(): Collection<T> {
         return new Collection<T>(this.dbClass(), async (cmd: string, projection: boolean, oneRecord: boolean) => {
             const ses = await connection.ses();
+            console.log(cmd);
             const qret = await ses.command(cmd).all();
             ses.close();
             if (projection) {

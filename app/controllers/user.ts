@@ -243,13 +243,17 @@ export class UserController extends BaseController {
         return { where: ret, count: retCount, retSel, groupby: ret2, orderby: ret3, skiplimit: ret4 };
     }
 
-    // @Get('linqfromlist')
-    // @Description('linqu from list example')
-    // @Return(Company)
-    // public async linqfromProjection() {
-
-    //     const a: Company = new Company();
-    //     const ret = await a.collection().where((t) => t.mainAddress.collection).execute();
-    //     return { where: ret };
-    // }
+    @Get('linqfromlink')
+    @Description('linq from link example')
+    @Return(Company)
+    public async linqfromProjection() {
+        const a: Company = new Company();
+        const ret = await a.collection().select((t) => t.mainAddress.city)
+        .where((t) => t.mainAddress.city === 'Zławieś Wielka' ).executeProjection();
+        const ret2 = await a.collection().where((t) => t.addressesList.size() > 0).executeProjection();
+        const ret3 = await a.collection().select((t) => t.addressesList[0]).where((t) => t.addressesList.size() > 0).executeProjection();
+        const ret4 = await a.collection().select((t) => t.addressesList[0].city)
+                    .where((t) => t.addressesList.size() > 0).executeProjection();
+        return { selectFromLink: ret , sizeCollection: ret2, selectFirst: ret3, selectFirstName: ret4};
+    }
 }

@@ -26,6 +26,15 @@ export class SwaggerApiController extends BaseController {
             produces: [
                 'application/json'
             ],
+            components: {
+                securitySchemes: {
+                    bearerAuth: {
+                        type: 'http',
+                        scheme: 'bearer',
+                        bearerFormat: 'JWT'
+                    }
+                }
+            },
             definitions: {}
         };
 
@@ -52,7 +61,40 @@ export class SwaggerApiController extends BaseController {
                 api.paths[path] = api.paths[path] || {};
                 api.paths[path][action.verb] = api.paths[path][action.verb] || {};
                 api.paths[path][action.verb].summary = action.description;
+                api.paths[path][action.verb].security = [
+                    { bearerAuth: [] }
+                ];
                 api.paths[path][action.verb].parameters = [];
+                if (action.path === 'auth') {
+                    api.paths[path][action.verb].requestBody = {
+                        content: {
+                          'application/json': {
+                            schema: {
+                                properties: {
+                                    username: {
+                                        type: 'string',
+                                        example: 'admin'
+                                    },
+                                    password: {
+                                        type: 'string',
+                                        example: 'password'
+                                    }
+                                }
+                            }
+                          }
+                        },
+                        description: 'order placed for purchasing the pet'
+                      };
+                }
+
+                // api.paths[path][action.verb].parameters.push({
+                //     name: 'username',
+                //     in: 'body',
+                //     description: 'Username password',
+                //     required: false,
+
+                // });
+
 
                 if (action.params) {
                     action.params.forEach((p: any) => {

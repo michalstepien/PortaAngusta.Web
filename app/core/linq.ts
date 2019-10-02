@@ -16,7 +16,7 @@ export default class Collection<T> {
     private limitNumber: number;
     private selectQuery: (t: T) => any;
     private whereQuery: (t: T) => boolean;
-    private luceneSearchIndexQuery: (t: T, isTrue?: boolean) => boolean;
+    private luceneSearchIndexQuery: (t: T, isTrue?: boolean) => any;
     private orderByQuery: (t: T) => any;
     private groupByQuery: (t: T) => any;
     private countFunct: (t: T) => any;
@@ -54,7 +54,7 @@ export default class Collection<T> {
         return this;
     }
 
-    public luceneSearchIndex(query: (t: T) => boolean, isTrue: boolean = true): Collection<T> {
+    public luceneSearchIndex(query: (t: T) => any, isTrue: boolean = true): Collection<T> {
         this.luceneSearchIndexQuery = query;
         return this;
     }
@@ -132,7 +132,7 @@ export default class Collection<T> {
     private getSql(action: sqlActionType = sqlActionType.select, m: T = null): string {
         let selectString = this.queryToSql(this.selectQuery);
         const whereString = this.queryToSql(this.whereQuery);
-        const luceneSearchIndexString = this.queryToSql(this.luceneSearchIndexQuery);
+        const luceneSearchIndexString = this.queryToSqlLucene(this.luceneSearchIndexQuery);
         const orderByString = this.queryToSql(this.orderByQuery);
         const groupByString = this.queryToSql(this.groupByQuery);
         const countString = this.queryToSql(this.countFunct);
@@ -180,17 +180,27 @@ export default class Collection<T> {
         return ret;
     }
 
-    private queryToSql(query: (t: T) => boolean, lucene: boolean = false): string {
+    private queryToSql(query: (t: T) => boolean): string {
         if (query) {
             const src = ts.createSourceFile('test.ts', query.toString(), ts.ScriptTarget.ES2018, false);
             const expr = src.statements[0] as ts.ExpressionStatement;
             const arrFunc = expr.expression as ts.ArrowFunction;
-            return this.toSql(arrFunc.body, lucene);
+            return this.toSql(arrFunc.body);
         }
         return '';
     }
 
-    private toSql(expr: ts.Node, lucene: boolean = false): string {
+    private queryToSqlLucene(query: (t: T) => boolean): string {
+        if (query) {
+            const src = ts.createSourceFile('test.ts', query.toString(), ts.ScriptTarget.ES2018, false);
+            const expr = src.statements[0] as ts.ExpressionStatement;
+            const arrFunc = expr.expression as ts.ArrowFunction;
+            return this.toSqlLucene(arrFunc.body);
+        }
+        return '';
+    }
+
+    private toSql(expr: ts.Node): string {
         switch (expr.kind) {
             case ts.SyntaxKind.ArrayLiteralExpression:
                 break;
@@ -361,4 +371,174 @@ export default class Collection<T> {
         }
     }
 
+    private toSqlLucene(expr: ts.Node): string {
+        switch (expr.kind) {
+            case ts.SyntaxKind.ArrayLiteralExpression:
+                break;
+            case ts.SyntaxKind.PropertyAccessExpression:
+                const paExpr = expr as ts.PropertyAccessExpression;
+                const parent = paExpr.expression;
+                let t = '';
+                if ( parent && parent.kind !== ts.SyntaxKind.Identifier) {
+                    t = this.toSql(parent) + '.';
+                }
+                return t + paExpr.name.text;
+            case ts.SyntaxKind.ParenthesizedExpression:
+                const parExpr = expr as ts.ParenthesizedExpression;
+
+                if (parExpr.expression.kind !== ts.SyntaxKind.ObjectLiteralExpression) {
+                    return '(' + this.toSql(parExpr.expression) + ')';
+                } else {
+                    return this.toSql(parExpr.expression);
+                }
+            case ts.SyntaxKind.BinaryExpression:
+                const bExpr = expr as ts.BinaryExpression;
+
+                let op = '';
+                switch (bExpr.operatorToken.kind) {
+                    case ts.SyntaxKind.EqualsEqualsToken:
+                        op = '=';
+                        break;
+                    case ts.SyntaxKind.EqualsEqualsEqualsToken:
+                        op = '=';
+                        break;
+                    case ts.SyntaxKind.GreaterThanToken:
+                        op = '>';
+                        break;
+                    case ts.SyntaxKind.GreaterThanEqualsToken:
+                        op = '>=';
+                        break;
+                    case ts.SyntaxKind.LessThanToken:
+                        op = '<';
+                        break;
+                    case ts.SyntaxKind.LessThanEqualsToken:
+                        op = '<=';
+                        break;
+                    case ts.SyntaxKind.AmpersandAmpersandToken:
+                        op = 'and';
+                        break;
+                    case ts.SyntaxKind.BarBarToken:
+                        op = 'or';
+                        break;
+                    default:
+                        op = '[UndefinedOperator]';
+                }
+
+                return this.toSql(bExpr.left) + ' ' + op + ' ' + this.toSql(bExpr.right);
+            case ts.SyntaxKind.NumericLiteral:
+                const nlExpr = expr as ts.NumericLiteral;
+                return nlExpr.text;
+            case ts.SyntaxKind.StringLiteral:
+                const slExpr = expr as ts.StringLiteral;
+                return '\'' + slExpr.text + '\'';
+            case ts.SyntaxKind.CallExpression:
+                const cExpr = expr as ts.CallExpression;
+                if (cExpr.expression.kind === ts.SyntaxKind.PropertyAccessExpression) {
+                    const cpaExpr = cExpr.expression as ts.PropertyAccessExpression;
+                    let funcName = '';
+                    let args = '';
+
+                    switch (cpaExpr.name.text) {
+                        case 'toUpperCase':
+                            funcName = 'toUpperCase()';
+                            break;
+                        case 'toLowerCase':
+                            funcName = 'toLowerCase()';
+                            break;
+                        case 'size':
+                            funcName = 'size()';
+                            break;
+                        case 'lengthString':
+                            funcName = 'length()';
+                            break;
+                        case 'trim':
+                            funcName = 'trim()';
+                            break;
+                        case 'type':
+                            funcName = 'type()';
+                            break;
+                        case 'replace':
+                            funcName = 'replace(' + cExpr.arguments.map(e => this.toSql(e)).join(', ') + ')';
+                            break;
+                        case 'append':
+                            funcName = 'append(' + cExpr.arguments.map(e => this.toSql(e)).join(', ') + ')';
+                            break;
+                        case 'substring':
+                            funcName = 'SUBSTRING';
+                            args = ', ' + cExpr.arguments.map(e => this.toSql(e)).join(', ');
+                            break;
+                        case 'asBoolean':
+                            funcName = 'asBoolean()';
+                            break;
+                        case 'asDate':
+                            funcName = 'asDate()';
+                            break;
+                        case 'asDateTime':
+                            funcName = 'asDateTime()';
+                            break;
+                        case 'asDecimal':
+                            funcName = 'asDecimal()';
+                            break;
+                        case 'asFloat':
+                            funcName = 'asFloat()';
+                            break;
+                        case 'asInteger':
+                            funcName = 'asInteger()';
+                            break;
+                        case 'asList':
+                            funcName = 'asList()';
+                            break;
+                        case 'asLong':
+                            funcName = 'asLong()';
+                            break;
+                        case 'asString':
+                            funcName = 'asString()';
+                            break;
+                        case 'charAt':
+                            funcName = 'charAt(' + cExpr.arguments.map(e => this.toSql(e)).join(', ') + ')';
+                            break;
+                        case 'convert':
+                            funcName = 'convert(' + cExpr.arguments.map(e => this.toSql(e)).join(', ') + ')';
+                            break;
+                        case 'hash':
+                            funcName = 'hash()';
+                            break;
+                        case 'indexOf':
+                            funcName = 'indexOf(' + cExpr.arguments.map(e => this.toSql(e)).join(', ') + ')';
+                            break;
+                        default:
+                            funcName = '[UndefinedFunction]';
+                            break;
+                    }
+                    return this.toSql(cpaExpr.expression) + '.' + funcName;
+                }
+                break;
+            case ts.SyntaxKind.ObjectLiteralExpression:
+                const olExpr = expr as ts.ObjectLiteralExpression;
+
+                return olExpr.properties.map(pr => {
+                    switch (pr.kind) {
+                        case ts.SyntaxKind.PropertyAssignment:
+                            const prAs = pr as ts.PropertyAssignment;
+                            const prNameObject = prAs.name as ts.Identifier;
+
+                            return this.toSql(prAs.initializer) + ' as ' + prNameObject.text;
+                        default:
+                            return '[undefined]';
+                    }
+                }).join(',\n');
+            case ts.SyntaxKind.ElementAccessExpression:
+                    const paExpr2 = expr as ts.ElementAccessExpression;
+                    const parent2 = paExpr2.expression;
+                    let t2 = '';
+                    if (parent2 && parent2.kind !== ts.SyntaxKind.Identifier) {
+                        t2 = this.toSql(parent2);
+                    }
+                    const n = paExpr2.argumentExpression as ts.NumericLiteral;
+                    return t2 + '[' + n.text + ']';
+            default:
+                console.log(expr.kind);
+                return '[undefined]';
+        }
+    }
 }

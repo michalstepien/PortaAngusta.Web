@@ -2,6 +2,7 @@ import express from 'express';
 import 'reflect-metadata';
 import { Base } from '../models/base';
 import * as babel from '@babel/parser';
+import AuthMiddleware from '../core/auth';
 
 export const metadata: any = {
     controllers: {}
@@ -43,7 +44,27 @@ export function Delete(path: string | RegExp) {
 
 export function Description(description: string) {
     return (object: any, methodName: string) => {
-        _addDescription({ object, methodName, description  });
+        _addDescription({ object, methodName, description });
+    };
+}
+
+export function Auth(isAuth: boolean = true) {
+    return (object: any, methodName: string) => {
+        const controller = metadata.controllers[object.constructor.name] || {};
+        controller.actions = controller.actions || {};
+        controller.actions[methodName] = controller.actions[methodName] || {};
+        controller.actions[methodName].auth = isAuth;
+        metadata.controllers[object.constructor.name] = controller;
+    };
+}
+
+export function Plain() {
+    return (object: any, methodName: string) => {
+        const controller = metadata.controllers[object.constructor.name] || {};
+        controller.actions = controller.actions || {};
+        controller.actions[methodName] = controller.actions[methodName] || {};
+        controller.actions[methodName].plain = true;
+        metadata.controllers[object.constructor.name] = controller;
     };
 }
 
@@ -52,7 +73,7 @@ export function Return(type: any, list: boolean = false) {
         const controller = metadata.controllers[object.constructor.name] || {};
         controller.actions = controller.actions || {};
         controller.actions[methodName] = controller.actions[methodName] || {};
-        controller.actions[methodName].return = { type, isList: list};
+        controller.actions[methodName].return = { type, isList: list };
         metadata.controllers[object.constructor.name] = controller;
     };
 }
@@ -69,8 +90,8 @@ export function Param(object: any, methodName: string, parameterIndex: number) {
     const controller = metadata.controllers[object.constructor.name] || {};
     controller.actions = controller.actions || {};
     controller.actions[methodName] = controller.actions[methodName] || {};
-    controller.actions[methodName].params = controller.actions[methodName].params  || [];
-    controller.actions[methodName].params.push({type: 1, index: parameterIndex, typeInput: null });
+    controller.actions[methodName].params = controller.actions[methodName].params || [];
+    controller.actions[methodName].params.push({ type: 1, index: parameterIndex, typeInput: null });
     metadata.controllers[object.constructor.name] = controller;
 }
 
@@ -107,8 +128,8 @@ function getArguments(func: any): Array<any> {
     };
 
     try {
-        const ast = babel.parse('\n ' + func.toString().replace('async', 'async function') + '\n', {plugins: ['typescript']});
-        const program =  ast.program;
+        const ast = babel.parse('\n ' + func.toString().replace('async', 'async function') + '\n', { plugins: ['typescript'] });
+        const program = ast.program;
         const body: any = program.body[0];
         const params = body.params;
         let ret: any[] = [];
@@ -143,34 +164,56 @@ export class BaseController {
         keys.forEach((k) => {
             const action = controller.actions[k];
             const path = '/api/' + controller.path + '/' + action.path;
-            router[action.verb](path, async (req: any, res: any) => {
-                const fPrams: any = [];
-                const p: any = this;
-                if (action.params) {
-                    action.params.forEach((mp: any) => {
-                        if (action.verb === 'get' || action.verb === 'delete') {
-                            let val = req.params[mp.name];
-                            if (val !== undefined && val !== null) {
-                                if (mp.type === 'number') {
-                                    val = Number(val);
-                                } else if (mp.type === 'Date') {
-                                    val = new Date(val);
+            let authMd = (req: any, res: any, next: any) => {
+                next();
+            };
+            if (action.auth) {
+                authMd = AuthMiddleware.checkToken;
+            }
+
+            if (action.plain) {
+                router[action.verb](path, authMd, (req: any, res: any) => {
+                    const p: any = this;
+                    try {
+
+                        return p[k].apply(this, [req, res]);
+                    } catch (error) {
+                        console.error(error);
+                        return res.send({ error: true, details: error.stack });
+                    }
+                });
+            } else {
+                router[action.verb](path, authMd, async (req: any, res: any) => {
+                    const p: any = this;
+                    const fPrams: any = [];
+                    if (action.params) {
+                        action.params.forEach((mp: any) => {
+                            if (action.verb === 'get' || action.verb === 'delete') {
+                                let val = req.params[mp.name];
+                                if (val !== undefined && val !== null) {
+                                    if (mp.type === 'number') {
+                                        val = Number(val);
+                                    } else if (mp.type === 'Date') {
+                                        val = new Date(val);
+                                    }
                                 }
+                                fPrams.push(val);
+                            } else if (action.verb === 'post' || action.verb === 'put') {
+                                fPrams.push(req.body[mp.name]);
                             }
-                            fPrams.push(val);
-                        } else if (action.verb === 'post' || action.verb === 'put') {
-                            fPrams.push(req.body[mp.name]);
-                        }
-                    });
-                }
-                try {
-                    const ret = await p[k].apply(this, fPrams);
-                    res.send(ret);
-                } catch (error) {
-                    console.error(error);
-                    res.send({error: true, details: error.stack});
-                }
-            });
+                        });
+                    }
+                    try {
+                        const ret = await p[k].apply(this, fPrams);
+                        return res.send(ret);
+                    } catch (error) {
+                        console.error(error);
+                        return res.send({ error: true, details: error.stack });
+                    }
+
+                });
+
+            }
         });
     }
 }

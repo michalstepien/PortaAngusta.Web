@@ -5,6 +5,10 @@ import { Base, dbProperty, dbTypes, ModelClass } from './base';
 @ModelClass('Company')
 export class Company extends LogDate<Company> {
 
+    luceneIndexes = {
+      Company: { name: String()}
+    };
+
     @dbProperty()
     public id = '';
 
@@ -31,5 +35,7 @@ export class Company extends LogDate<Company> {
     }
 
 }
+
+
 
 

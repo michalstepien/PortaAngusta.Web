@@ -10,7 +10,7 @@ const password = process.env.DB_PASSWORD;
 
 class OrientConnection {
     private client: any;
-    private pool: any;
+    private pool: any = {};
     private session: any;
 
     public async connect(): Promise<any> {
@@ -21,9 +21,10 @@ class OrientConnection {
     }
 
     public async init(): Promise<any> {
+        console.log('INIT connection');
         try {
             this.client = await this.connect();
-            this.pool = await this.client.sessions({ name, username, password });
+            this.pool.root = await this.client.sessions({ name, username, password });
 
         } catch (error) {
             console.error(error);
@@ -32,7 +33,7 @@ class OrientConnection {
     }
 
     public async ses(): Promise<any> {
-        this.session = await this.pool.acquire();
+        this.session = await this.pool.root.acquire();
         return this.session;
     }
 

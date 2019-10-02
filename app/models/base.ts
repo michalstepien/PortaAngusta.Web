@@ -72,6 +72,9 @@ export function ModelClass(value: string) {
 }
 
 export class Base<T> {
+    public type: any;
+    public id: string;
+    public luceneIndexes: any;
 
     constructor(type: any) {
         this.type = type;
@@ -162,10 +165,6 @@ export class Base<T> {
             }
         });
     }
-
-    public type: any;
-
-    public id: string;
 
     public static async  findById(id: string): Promise<any> {
         // TO DO: change to command
@@ -506,4 +505,3 @@ declare global {
     T extends Promise<infer U> ? U :
     T;
 }
-

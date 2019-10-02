@@ -2,8 +2,8 @@ import { Company } from '../models/company';
 import { Address } from '../models/address';
 import { User } from '../models/user';
 import { Jdg } from '../clusters/jdg';
-import { BaseController, Controller, Delete, Get, Post, Put, Description, Query, Param, Return } from './base';
-
+import { BaseController, Controller, Auth, Delete, Get, Post, Put, Description, Query, Param, Return, Plain } from './base';
+import { sign } from 'jsonwebtoken';
 
 @Controller('users')
 export class UserController extends BaseController {
@@ -249,20 +249,67 @@ export class UserController extends BaseController {
     public async linqfromProjection() {
         const a: Company = new Company();
         const ret = await a.collection().select((t) => t.mainAddress.city)
-        .where((t) => t.mainAddress.city === 'Zławieś Wielka' ).executeProjection();
+            .where((t) => t.mainAddress.city === 'Zławieś Wielka').executeProjection();
         const ret2 = await a.collection().where((t) => t.addressesList.size() > 0).executeProjection();
         const ret3 = await a.collection().select((t) => t.addressesList[0]).where((t) => t.addressesList.size() > 0).executeProjection();
         const ret4 = await a.collection().select((t) => t.addressesList[0].city)
-                    .where((t) => t.addressesList.size() > 0).executeProjection();
-        return { selectFromLink: ret , sizeCollection: ret2, selectFirst: ret3, selectFirstName: ret4};
+            .where((t) => t.addressesList.size() > 0).executeProjection();
+        return { selectFromLink: ret, sizeCollection: ret2, selectFirst: ret3, selectFirstName: ret4 };
     }
 
+    @Auth()
     @Get('linqdelete')
     @Description('linq delete example')
     @Return(Company)
     public async linqDelete() {
         const a: Company = new Company();
         const ret = await a.collection().where((t) => t.addressesList.size() > 40).delete();
-        return { howmDel: ret};
+        return { howmDel: ret };
+    }
+
+    @Get('linqlucene')
+    @Description('linq lucene example')
+    @Return(Company)
+    public async linqLucene() {
+        const a: Company = new Company();
+        const ret = await a.collection().luceneSearchIndex((t) => t.luceneIndexes.Company.name === '2').execute();
+        return { howmDel: ret };
+    }
+
+    @Post('auth')
+    @Description('auth')
+    @Plain()
+    public auth(req: any, res: any) {
+        const username = req.body.username;
+        const password = req.body.password;
+        // For the given username fetch user from DB
+        const mockedUsername = 'admin';
+        const mockedPassword = 'password';
+
+        if (username && password) {
+            if (username === mockedUsername && password === mockedPassword) {
+                const token = sign({ username },
+                    'dupasecret',
+                    {
+                        expiresIn: '24h' // expires in 24 hours
+                    }
+                );
+                return res.json({
+                    success: true,
+                    message: 'Authentication successful!',
+                    token
+                });
+            } else {
+                return res.status(403).json({
+                    success: false,
+                    message: 'Incorrect username or password'
+                });
+            }
+        } else {
+            return res.status(400).json({
+                success: false,
+                message: 'Authentication failed! Please check the request'
+            });
+        }
     }
 }

@@ -140,7 +140,6 @@ function getArguments(func: any): Array<any> {
         }
         return ret;
     } catch (e) {
-        console.log(e);
         return []; // could also return null
     }
 }

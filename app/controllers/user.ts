@@ -4,6 +4,7 @@ import { User } from '../models/user';
 import { Jdg } from '../clusters/jdg';
 import { BaseController, Controller, Auth, Delete, Get, Post, Put, Description, Query, Param, Return, Plain } from './base';
 import { sign } from 'jsonwebtoken';
+import Utils from '../core/utils';
 
 @Controller('users')
 export class UserController extends BaseController {
@@ -279,7 +280,7 @@ export class UserController extends BaseController {
     @Post('auth')
     @Description('auth')
     @Plain()
-    public auth(req: any, res: any) {
+    public async auth(req: any, res: any) {
         const username = req.body.username;
         const password = req.body.password;
         // For the given username fetch user from DB
@@ -311,5 +312,16 @@ export class UserController extends BaseController {
                 message: 'Authentication failed! Please check the request'
             });
         }
+    }
+
+    @Get('checkpassword')
+    @Description('check password')
+    public async checkPassword() {
+        const usr: User = new User();
+        const ret = await usr.collection().where((u) => u.name === 'janusz').execute();
+        if (ret.length > 0) {
+            return { ok : Utils.chceckPassword('janusz', ret[0].password) };
+        }
+        return { ok: false};
     }
 }

@@ -9,8 +9,8 @@ export class User extends Base<User> {
     @dbProperty()
     public name = '';
 
-    @dbProperty('password')
-    public haslo = '';
+    @dbProperty()
+    public password = '';
 
     @dbProperty()
     public status = 'ACTIVE';
@@ -18,4 +18,9 @@ export class User extends Base<User> {
     constructor() {
         super(User);
     }
+
+    // static checkPassword() {
+    //    // https://github.com/orientechnologies/orientdb/issues/7499
+
+    // }
 }

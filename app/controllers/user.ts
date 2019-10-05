@@ -2,7 +2,7 @@ import { Company } from '../models/company';
 import { Address } from '../models/address';
 import { User } from '../models/user';
 import { Jdg } from '../clusters/jdg';
-import { BaseController, Controller, Auth, Delete, Get, Post, Put, Description, Query, Param, Return, Plain } from './base';
+import { BaseController, Controller, Auth, Delete, Get, Post, Put, Description, Query, Param, Body, Return, Plain } from './base';
 import { sign } from 'jsonwebtoken';
 import Utils from '../core/utils';
 
@@ -314,13 +314,14 @@ export class UserController extends BaseController {
         }
     }
 
-    @Get('checkpassword')
+    @Post('checkpassword')
     @Description('check password')
-    public async checkPassword() {
+    public async checkPassword(@Body username: string, @Body password: string) {
         const usr: User = new User();
-        const ret = await usr.collection().where((u) => u.name === 'janusz').execute();
+        const dd = 'janusz1';
+        const ret = await usr.collection().where((u) => u.name === username || u.name === dd, {username, dd}).execute();
         if (ret.length > 0) {
-            return { ok : Utils.chceckPassword('janusz', ret[0].password) };
+            return { ok : Utils.chceckPassword(password, ret[0].password) };
         }
         return { ok: false};
     }

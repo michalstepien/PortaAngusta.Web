@@ -1,4 +1,5 @@
 import * as ts from 'typescript';
+import { RSA_NO_PADDING } from 'constants';
 
 enum sqlActionType {
     select = 0,
@@ -8,14 +9,15 @@ enum sqlActionType {
 
 export default class Collection<T> {
     private className: string;
-    private executionFunction: (cmd: string, projection: boolean, oneRecord: boolean) => Promise<T[]>;
-    private deleteFunction: (cmd: string) => Promise<number>;
-    private updateFunction: (cmd: string) => Promise<number>;
+    private executionFunction: (cmd: string, projection: boolean, oneRecord: boolean, params: any) => Promise<T[]>;
+    private deleteFunction: (cmd: string, params: any) => Promise<number>;
+    private updateFunction: (cmd: string, params: any) => Promise<number>;
     private isCount: boolean;
     private skipNumber: number;
     private limitNumber: number;
     private selectQuery: (t: T) => any;
     private whereQuery: (t: T) => boolean;
+    private params: any;
     private luceneSearchIndexQuery: (t: T, isTrue?: boolean) => any;
     private orderByQuery: (t: T) => any;
     private groupByQuery: (t: T) => any;
@@ -39,9 +41,9 @@ export default class Collection<T> {
     private oneRecord: boolean;
 
     constructor(classn: string,
-                executefn: (cmd: string, projection: boolean, oneRecord: boolean) => Promise<T[]>,
-                deletefn: (cmd: string) => Promise<number>,
-                updatefn: (cmd: string) => Promise<number>,
+                executefn: (cmd: string, projection: boolean, oneRecord: boolean, params: any) => Promise<T[]>,
+                deletefn: (cmd: string, params: any) => Promise<number>,
+                updatefn: (cmd: string, params: any) => Promise<number>,
                 ) {
         this.className = classn;
         this.executionFunction = executefn;
@@ -49,8 +51,9 @@ export default class Collection<T> {
         this.updateFunction = updatefn;
     }
 
-    public where(query: (t: T) => boolean): Collection<T> {
+    public where(query: (t: T) => boolean, params?: any): Collection<T> {
         this.whereQuery = query;
+        this.params = params;
         return this;
     }
 
@@ -114,19 +117,19 @@ export default class Collection<T> {
     }
 
     public execute(): Promise<T[]> {
-        return this.executionFunction(this.getSql(), false, false);
+        return this.executionFunction(this.getSql(), false, false, this.params);
     }
 
     public executeProjection(): any {
-        return this.executionFunction(this.getSql(), true, this.isCount);
+        return this.executionFunction(this.getSql(), true, this.isCount, this.params);
     }
 
     public delete(): Promise<number> {
-        return this.deleteFunction(this.getSql(sqlActionType.delete));
+        return this.deleteFunction(this.getSql(sqlActionType.delete), this.params);
     }
 
     public update(m: T): Promise<number> {
-        return this.updateFunction(this.getSql(sqlActionType.update));
+        return this.updateFunction(this.getSql(sqlActionType.update), this.params);
     }
 
     private getSql(action: sqlActionType = sqlActionType.select, m: T = null): string {
@@ -365,6 +368,11 @@ export default class Collection<T> {
                     }
                     const n = paExpr2.argumentExpression as ts.NumericLiteral;
                     return t2 + '[' + n.text + ']';
+            case ts.SyntaxKind.Identifier:
+                const paExpr4 = expr as ts.Identifier;
+                return ':' + paExpr4.escapedText;
+            case ts.SyntaxKind.TemplateExpression:
+                return '""';
             default:
                 console.log(expr.kind);
                 return '[undefined]';

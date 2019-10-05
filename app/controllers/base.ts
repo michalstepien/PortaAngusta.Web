@@ -68,6 +68,7 @@ export function Plain() {
     };
 }
 
+
 export function Return(type: any, list: boolean = false) {
     return (object: any, methodName: string) => {
         const controller = metadata.controllers[object.constructor.name] || {};
@@ -78,12 +79,24 @@ export function Return(type: any, list: boolean = false) {
     };
 }
 
-export function Required(object: any, methodName: string, parameterIndex: number) {
-    // console.log(object, methodName, parameterIndex);
+//#region Route Params
+
+export function Body(object: any, methodName: string, parameterIndex: number) {
+    const controller = metadata.controllers[object.constructor.name] || {};
+    controller.actions = controller.actions || {};
+    controller.actions[methodName] = controller.actions[methodName] || {};
+    controller.actions[methodName].params = controller.actions[methodName].params || [];
+    controller.actions[methodName].params.push({ type: ParamType.body, index: parameterIndex, typeInput: null });
+    metadata.controllers[object.constructor.name] = controller;
 }
 
 export function Query(object: any, methodName: string, parameterIndex: number) {
-    // console.log(object, methodName, parameterIndex);
+    const controller = metadata.controllers[object.constructor.name] || {};
+    controller.actions = controller.actions || {};
+    controller.actions[methodName] = controller.actions[methodName] || {};
+    controller.actions[methodName].params = controller.actions[methodName].params || [];
+    controller.actions[methodName].params.push({ type: ParamType.query, index: parameterIndex, typeInput: null });
+    metadata.controllers[object.constructor.name] = controller;
 }
 
 export function Param(object: any, methodName: string, parameterIndex: number) {
@@ -91,9 +104,20 @@ export function Param(object: any, methodName: string, parameterIndex: number) {
     controller.actions = controller.actions || {};
     controller.actions[methodName] = controller.actions[methodName] || {};
     controller.actions[methodName].params = controller.actions[methodName].params || [];
-    controller.actions[methodName].params.push({ type: 1, index: parameterIndex, typeInput: null });
+    controller.actions[methodName].params.push({ type: ParamType.param, index: parameterIndex, typeInput: null });
     metadata.controllers[object.constructor.name] = controller;
 }
+
+export enum ParamType {
+    param = 1,
+    query = 2,
+    body = 3
+}
+//#endregion
+
+
+
+
 
 function _addVerbFunctionMeta({ verb, path, object, methodName }: any) {
 

@@ -87,24 +87,46 @@ export class SwaggerApiController extends BaseController {
                       };
                 }
 
-                // api.paths[path][action.verb].parameters.push({
-                //     name: 'username',
-                //     in: 'body',
-                //     description: 'Username password',
-                //     required: false,
-
-                // });
-
-
                 if (action.params) {
                     action.params.forEach((p: any) => {
-                        api.paths[path][action.verb].parameters.push({
-                            name: p.name,
-                            in: 'path',
-                            description: 'How many items to return at one time (max 100)',
-                            required: false,
-                            type: 'string'
-                        });
+                        if (p.type === 1) {
+                            api.paths[path][action.verb].parameters.push({
+                                name: p.name,
+                                in: 'path',
+                                description: 'How many items to return at one time (max 100)',
+                                required: false,
+                                type: 'string'
+                            });
+                        } else if (p.type === 2) {
+
+                        } else if (p.type === 3) {
+                            if (!api.paths[path][action.verb].requestBody) {
+                                api.paths[path][action.verb].requestBody = {
+                                    content: {
+                                      'application/json': {
+                                        schema: {
+                                            properties: {
+                                                username: {
+                                                    type: 'string',
+                                                    example: 'admin'
+                                                },
+                                                password: {
+                                                    type: 'string',
+                                                    example: 'password'
+                                                }
+                                            }
+                                        }
+                                      }
+                                    },
+                                    description: 'som description'
+                                  };
+                            }
+                            console.log(p);
+                            api.paths[path][action.verb].requestBody.content['application/json'].schema.properties[p.name] = {
+                                type: 'string',
+                                example: 'dupa'
+                            };
+                        }
                     });
                 }
 

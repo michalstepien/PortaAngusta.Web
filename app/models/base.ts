@@ -437,10 +437,10 @@ export class Base<T> {
     }
 
     public collection(): Collection<T> {
-        return new Collection<T>(this.dbClass(), async (cmd: string, projection: boolean, oneRecord: boolean) => {
+        return new Collection<T>(this.dbClass(), async (cmd: string, projection: boolean, oneRecord: boolean, params: any) => {
             const ses = await connection.ses();
             console.log(cmd);
-            const qret = await ses.command(cmd).all();
+            const qret = await ses.command(cmd, {params}).all();
             ses.close();
             if (projection) {
                 if (oneRecord) {
@@ -457,16 +457,16 @@ export class Base<T> {
                 });
                 return elements;
             }
-        }, async (cmd: string) => {
+        }, async (cmd: string, params: any) => {
             const ses = await connection.ses();
             console.log(cmd);
-            const qret = await ses.command(cmd).all();
+            const qret = await ses.command(cmd, {params}).all();
             ses.close();
             return qret;
-        }, async (cmd: string) => {
+        }, async (cmd: string, params: any) => {
             const ses = await connection.ses();
             console.log(cmd);
-            const qret = await ses.command(cmd).all();
+            const qret = await ses.command(cmd, {params}).all();
             ses.close();
             return qret;
         });

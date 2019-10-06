@@ -5,6 +5,7 @@ import { Jdg } from '../clusters/jdg';
 import { BaseController, Controller, Auth, Delete, Get, Post, Put, Description, Query, Param, Body, Return, Plain } from './base';
 import { sign } from 'jsonwebtoken';
 import Utils from '../core/utils';
+import { app } from '../server';
 
 @Controller('users')
 export class UserController extends BaseController {
@@ -324,5 +325,19 @@ export class UserController extends BaseController {
             return { ok : Utils.chceckPassword(password, ret[0].password) };
         }
         return { ok: false};
+    }
+
+    @Get('cacheset')
+    @Description('cache set example')
+    public async cache() {
+        await app.cache.set('dupawolowaTest', { piesek: 'leszek', kon: 'rafał'});
+        return { ok: false};
+    }
+
+    @Get('cacheget')
+    @Description('cache get example')
+    public async cacheget() {
+        const ret = await app.cache.get('dupawolowaTest');
+        return { ok: ret};
     }
 }

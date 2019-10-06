@@ -9,6 +9,7 @@ import connection from './db';
 import LiveQueries from './db/live';
 import {Company} from './models/company';
 import createController from './routes';
+import Cache from './core/cache';
 import process from 'process';
 
 dotenv.config();
@@ -19,6 +20,7 @@ class App {
     private LocalStrategy = passportLocal.Strategy;
     private FacebookStrategy = passportFacebook.Strategy;
     private lq: LiveQueries = null;
+    public cache: Cache;
 
     constructor() {
         this.app = express();
@@ -29,6 +31,7 @@ class App {
         this.onExit();
         this.configPasport();
         await this.initDB();
+        this.initCache();
         this.app.use(await createController());
         await this.app.listen(this.port);
         console.log('\x1b[36m%s\x1b[0m', `SERVER STARTED at http://localhost:${this.port}`);
@@ -80,6 +83,15 @@ class App {
         await connection.ses();
     }
 
+    private initCache() {
+        try {
+            this.cache = new Cache();
+            this.cache.init();
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
     private onExit() {
         [`exit`, `SIGINT`, `SIGUSR1`, `SIGUSR2`, `uncaughtException`, `SIGTERM`].forEach((eventType: any) => {
             process.on(eventType, this.cleanUpServer.bind(this, eventType));
@@ -114,8 +126,8 @@ class App {
 
 }
 
-const s = new App();
-
+const app = new App();
+export { app };
 export default async function server(): Promise<any> {
-    return await s.initialize();
+    return await app.initialize();
 }

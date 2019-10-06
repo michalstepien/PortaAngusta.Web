@@ -2,6 +2,8 @@ import 'reflect-metadata';
 import connection from '../db';
 import Cluster from '../clusters/base';
 import Collection from '../core/linq';
+import { app } from '../server';
+import crypto from 'crypto';
 
 const dbPropertyMetadataKey = Symbol('dbProperty');
 
@@ -436,19 +438,39 @@ export class Base<T> {
         return { keys: mapKeys[retName] || [], values: ret[s] || [] };
     }
 
-    public collection(): Collection<T> {
+    public collection(cache: boolean = false): Collection<T> {
         return new Collection<T>(this.dbClass(), async (cmd: string, projection: boolean, oneRecord: boolean, params: any) => {
-            const ses = await connection.ses();
-            console.log(cmd);
-            const qret = await ses.command(cmd, {params}).all();
-            ses.close();
+            let hasCasched = false;
+            let qret = null;
+            const hash = crypto.createHash('md5').update(cmd).digest('hex');
+            if (cache) {
+                if (app.cache.exists(hash)) {
+                    hasCasched = true;
+                    qret = app.cache.get(cmd);
+                }
+            }
+            if (!hasCasched) {
+                const ses = await connection.ses();
+                console.log(cmd);
+                qret = await ses.command(cmd, {params}).all();
+                ses.close();
+            }
             if (projection) {
                 if (oneRecord) {
+                    if (cache && !hasCasched) {
+                        app.cache.set(hash, qret[0].onerec);
+                    }
                     return qret[0].onerec;
                 } else {
+                    if (cache && !hasCasched) {
+                        app.cache.set(hash, qret);
+                    }
                     return qret;
                 }
             } else {
+                if (cache && !hasCasched) {
+                    app.cache.set(hash, qret);
+                }
                 const elements: T[] = [];
                 qret.forEach((element: any) => {
                     const a: any = new this.type();

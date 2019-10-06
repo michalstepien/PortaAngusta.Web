@@ -320,7 +320,7 @@ export class UserController extends BaseController {
     public async checkPassword(@Body username: string, @Body password: string) {
         const usr: User = new User();
         const dd = 'janusz1';
-        const ret = await usr.collection().where((u) => u.name === username || u.name === dd, {username, dd}).execute();
+        const ret = await usr.collection(true).where((u) => u.name === username || u.name === dd, {username, dd}).execute();
         if (ret.length > 0) {
             return { ok : Utils.chceckPassword(password, ret[0].password) };
         }

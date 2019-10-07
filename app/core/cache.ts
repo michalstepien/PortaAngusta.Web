@@ -5,7 +5,8 @@ export default class Cache {
 
     private client: redis.RedisClient;
     private getC: (key: string) => Promise<any>;
-    private setC: (key: string, value: any) => Promise<any>;
+    private setC: (key: string, value: any, mode?: string, duration?: number) => Promise<any>;
+    private delC: (key: string) => Promise<any>;
 
     public exists: (key: string) => Promise<boolean>;
 
@@ -23,13 +24,19 @@ export default class Cache {
         }
     }
 
-    public async set(key: string, value: any): Promise<any> {
+    public async set(key: string, value: any, mode?: string, duration?: number): Promise<any> {
         if (this.checkPrimitive(value)) {
-            return this.setC(key, value);
+            return this.setC(key, value, mode, duration);
         } else {
-            return this.setC(key, JSON.stringify(value));
+            return this.setC(key, JSON.stringify(value), mode, duration);
         }
     }
+
+    public async del(key: string): Promise<any> {
+        const p = await this.delC(key);
+        return p;
+    }
+
 
     public init() {
         try {
@@ -39,6 +46,7 @@ export default class Cache {
             });
             this.getC = promisify(this.client.get).bind(this.client);
             this.setC = promisify(this.client.set).bind(this.client);
+            this.delC = promisify(this.client.del).bind(this.client);
             this.exists = promisify(this.client.exists).bind(this.client);
         } catch (error) {
             console.error(error);

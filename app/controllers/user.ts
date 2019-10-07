@@ -6,6 +6,7 @@ import { BaseController, Controller, Auth, Delete, Get, Post, Put, Description, 
 import { sign } from 'jsonwebtoken';
 import Utils from '../core/utils';
 import { app } from '../server';
+import { Auth as AuthProccess } from '../core/auth';
 
 @Controller('users')
 export class UserController extends BaseController {
@@ -284,35 +285,32 @@ export class UserController extends BaseController {
     public async auth(req: any, res: any) {
         const username = req.body.username;
         const password = req.body.password;
-        // For the given username fetch user from DB
-        const mockedUsername = 'admin';
-        const mockedPassword = 'password';
 
         if (username && password) {
-            if (username === mockedUsername && password === mockedPassword) {
-                const token = sign({ username },
-                    'dupasecret',
-                    {
-                        expiresIn: '24h' // expires in 24 hours
-                    }
-                );
-                return res.json({
-                    success: true,
-                    message: 'Authentication successful!',
-                    token
-                });
-            } else {
-                return res.status(403).json({
-                    success: false,
-                    message: 'Incorrect username or password'
-                });
+            const usr: User = new User();
+            const ret = await usr.collection().where((u) => u.name === username, { username }).execute();
+            if (ret.length > 0) {
+                if (Utils.chceckPassword(password, ret[0].password)) {
+                    const a = new AuthProccess();
+                    const token = await a.sign(ret[0]);
+
+                    return res.json({
+                        success: true,
+                        message: 'Authentication successful!',
+                        token
+                    });
+                } else {
+                    return res.status(403).json({
+                        success: false,
+                        message: 'Incorrect username or password'
+                    });
+                }
             }
-        } else {
-            return res.status(400).json({
-                success: false,
-                message: 'Authentication failed! Please check the request'
-            });
         }
+        return res.status(400).json({
+            success: false,
+            message: 'Authentication failed! Please check the request'
+        });
     }
 
     @Post('checkpassword')
@@ -320,24 +318,24 @@ export class UserController extends BaseController {
     public async checkPassword(@Body username: string, @Body password: string) {
         const usr: User = new User();
         const dd = 'janusz1';
-        const ret = await usr.collection(true).where((u) => u.name === username || u.name === dd, {username, dd}).execute();
+        const ret = await usr.collection(true).where((u) => u.name === username || u.name === dd, { username, dd }).execute();
         if (ret.length > 0) {
-            return { ok : Utils.chceckPassword(password, ret[0].password) };
+            return { ok: Utils.chceckPassword(password, ret[0].password) };
         }
-        return { ok: false};
+        return { ok: false };
     }
 
     @Get('cacheset')
     @Description('cache set example')
     public async cache() {
-        await app.cache.set('dupawolowaTest', { piesek: 'leszek', kon: 'rafał'});
-        return { ok: false};
+        await app.cache.set('dupawolowaTest', { piesek: 'leszek', kon: 'rafał' });
+        return { ok: false };
     }
 
     @Get('cacheget')
     @Description('cache get example')
     public async cacheget() {
         const ret = await app.cache.get('dupawolowaTest');
-        return { ok: ret};
+        return { ok: ret };
     }
 }

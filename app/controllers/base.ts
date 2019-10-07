@@ -2,7 +2,7 @@ import express from 'express';
 import 'reflect-metadata';
 import { Base } from '../models/base';
 import * as babel from '@babel/parser';
-import AuthMiddleware from '../core/auth';
+import { AuthMiddleware } from '../core/auth';
 
 export const metadata: any = {
     controllers: {}

@@ -25,11 +25,18 @@ export default class Cache {
     }
 
     public async set(key: string, value: any, mode?: string, duration?: number): Promise<any> {
+        const args: Array<any> = [ key ];
         if (this.checkPrimitive(value)) {
-            return this.setC(key, value, mode, duration);
+            args.push(value);
         } else {
-            return this.setC(key, JSON.stringify(value), mode, duration);
+            args.push(JSON.stringify(value));
         }
+        if (mode && duration) {
+            args.push(mode);
+            args.push(duration);
+        }
+        return this.setC.apply(this, args);
+
     }
 
     public async del(key: string): Promise<any> {

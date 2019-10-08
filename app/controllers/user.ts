@@ -3,10 +3,11 @@ import { Address } from '../models/address';
 import { User } from '../models/user';
 import { Jdg } from '../clusters/jdg';
 import { BaseController, Controller, Auth, Delete, Get, Post, Put, Description, Query, Param, Body, Return, Plain } from './base';
-import { sign } from 'jsonwebtoken';
 import Utils from '../core/utils';
 import { app } from '../server';
 import { Auth as AuthProccess } from '../core/auth';
+import Session from '../core/session';
+import connection from '../db';
 
 @Controller('users')
 export class UserController extends BaseController {
@@ -86,6 +87,7 @@ export class UserController extends BaseController {
         return c;
     }
 
+    @Auth()
     @Get('addresssave')
     @Description('Save address')
     @Return(Company)
@@ -265,6 +267,8 @@ export class UserController extends BaseController {
     @Description('linq delete example')
     @Return(Company)
     public async linqDelete() {
+        const ss = Session.get('user');
+        console.log(ss);
         const a: Company = new Company();
         const ret = await a.collection().where((t) => t.addressesList.size() > 40).delete();
         return { howmDel: ret };
@@ -293,6 +297,8 @@ export class UserController extends BaseController {
                 if (Utils.chceckPassword(password, ret[0].password)) {
                     const a = new AuthProccess();
                     const token = await a.sign(ret[0]);
+
+                    await connection.initUser(username, password);
 
                     return res.json({
                         success: true,

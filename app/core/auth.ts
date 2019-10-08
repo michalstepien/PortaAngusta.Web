@@ -2,6 +2,7 @@ import { verify, sign, SignOptions, decode } from 'jsonwebtoken';
 import { promisify } from 'util';
 import { User } from '../models/user';
 import { app } from '../server';
+import Session from './session';
 import crypto from 'crypto';
 
 
@@ -49,7 +50,6 @@ export class  Auth {
 
 
 export class AuthMiddleware {
-    // https://medium.com/dev-bits/a-guide-for-adding-jwt-token-based-authentication-to-your-single-page-nodejs-applications-c403f7cf04f4
     public static checkToken = (req: any, res: any, next: any) => {
         let token = req.headers['x-access-token'] || req.headers.authorization;
         if (token && token.startsWith('Bearer ')) {
@@ -60,6 +60,7 @@ export class AuthMiddleware {
             const a = new Auth();
             a.verify(token).then((ret) => {
                 if (ret) {
+                    Session.set('user', ret);
                     req.decoded = ret;
                     next();
                 } else {
@@ -69,13 +70,6 @@ export class AuthMiddleware {
                     });
                 }
             });
-            // verify(token, 'dupasecret', (err: any, decoded: any) => {
-            //     if (err) {
-            //     } else {
-            //         req.decoded = decoded;
-            //         next();
-            //     }
-            // });
         } else {
             return res.json({
                 success: false,

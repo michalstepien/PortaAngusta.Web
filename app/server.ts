@@ -1,15 +1,12 @@
 import dotenv from 'dotenv';
 import express from 'express';
-import session from 'express-session';
-import passport from 'passport';
-import passportFacebook from 'passport-facebook';
-import passportLocal from 'passport-local';
 import swaggerUi from 'swagger-ui-express';
 import connection from './db';
 import LiveQueries from './db/live';
 import {Company} from './models/company';
 import createController from './routes';
 import Cache from './core/cache';
+import Session from './core/session';
 import process from 'process';
 
 dotenv.config();
@@ -17,8 +14,6 @@ dotenv.config();
 class App {
     public app: express.Application;
     private port = process.env.SERVER_HTTP_PORT;
-    private LocalStrategy = passportLocal.Strategy;
-    private FacebookStrategy = passportFacebook.Strategy;
     private lq: LiveQueries = null;
     public cache: Cache;
 
@@ -29,7 +24,6 @@ class App {
 
     public async initialize(): Promise<any> {
         this.onExit();
-        this.configPasport();
         await this.initDB();
         this.initCache();
         this.app.use(await createController());
@@ -43,10 +37,8 @@ class App {
     }
 
     private configMiddelwares(): void {
-        this.app.use(passport.initialize());
-        this.app.use(passport.session());
-        this.app.use(session({ secret: 'keyboard cat', resave: false, saveUninitialized: false }));
         this.app.use(express.json());
+        this.app.use(Session.middleware);
         this.app.set(
             'json replacer',
             ( key: any, value: any ) => {
@@ -104,24 +96,6 @@ class App {
             this.lq.unsubscribeAll();
         }
         process.exit(0);
-    }
-
-    private configPasport() {
-        passport.use(new this.LocalStrategy({ usernameField: 'email' }, (email, password, done) => {
-            // User.findOne({ email: email.toLowerCase() }, (err, user: any) => {
-            //     if (err) { return done(err); }
-            //     if (!user) {
-            //         return done(undefined, false, { message: `Email ${email} not found.` });
-            //     }
-            //     user.comparePassword(password, (err: Error, isMatch: boolean) => {
-            //         if (err) { return done(err); }
-            //         if (isMatch) {
-            //             return done(undefined, user);
-            //         }
-            //         return done(undefined, false, { message: "Invalid email or password." });
-            //     });
-            // });
-        }));
     }
 
 }

@@ -444,32 +444,31 @@ export class Base<T> {
             let qret = null;
             const hash = crypto.createHash('md5').update(cmd).digest('hex');
             if (cache) {
-                if (app.cache.exists(hash)) {
+                if (await app.cache.exists(hash)) {
                     hasCasched = true;
-                    qret = app.cache.get(cmd);
+                    qret = await app.cache.get(hash);
                 }
             }
             if (!hasCasched) {
                 const ses = await connection.ses();
-                console.log(cmd);
                 qret = await ses.command(cmd, {params}).all();
                 ses.close();
             }
             if (projection) {
                 if (oneRecord) {
                     if (cache && !hasCasched) {
-                        app.cache.set(hash, qret[0].onerec);
+                        await app.cache.set(hash, qret[0].onerec);
                     }
                     return qret[0].onerec;
                 } else {
                     if (cache && !hasCasched) {
-                        app.cache.set(hash, qret);
+                        await app.cache.set(hash, qret);
                     }
                     return qret;
                 }
             } else {
                 if (cache && !hasCasched) {
-                    app.cache.set(hash, qret);
+                    await app.cache.set(hash, qret);
                 }
                 const elements: T[] = [];
                 qret.forEach((element: any) => {

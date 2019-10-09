@@ -303,7 +303,8 @@ export class UserController extends BaseController {
                     return res.json({
                         success: true,
                         message: 'Authentication successful!',
-                        token
+                        token,
+                        user: ret[0]
                     });
                 } else {
                     return res.status(403).json({

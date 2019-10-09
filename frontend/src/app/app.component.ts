@@ -14,7 +14,7 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.loadData();
+    // this.loadData();
   }
 
   async loadData() {

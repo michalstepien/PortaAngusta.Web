@@ -1,16 +1,11 @@
 html,
 body {
-  height: 100%;
+  background-color: #006a4e;
   margin: 0;
   padding: 0;
 }
 
 body {
-  background-image: url(https://upload.wikimedia.org/wikipedia/commons/2/27/EDPL_Old_office.jpg);
-  background-position: center;
-  background-size: cover;
-  background-repeat: no-repeat;
-  min-height: 100vh;
   font-family: 'Roboto', sans-serif;
 }
 
@@ -103,4 +98,51 @@ body {
 
 .login-wrapper .mat-form-field-appearance-legacy .mat-form-field-infix {
   padding: 0.8375em 0;
+}
+
+.cp{
+  cursor: pointer;
+}
+
+.p-5{
+  padding: 5px;
+}
+.p-10{
+  padding: 10px;
+}
+.p-15{
+  padding: 15px;
+}
+
+.mr-15{
+  margin-right: 15px!important;
+}
+
+.frs{
+  flex: 1 1 auto;
+}
+.cp{
+  cursor: pointer;
+}
+
+.side-outlet .mat-drawer-inner-container{
+  overflow: hidden;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+ 
+::-webkit-scrollbar-thumb {
+  background: #cccccc;
+  border-radius: 20px;
+}
+
+::-webkit-scrollbar-track {
+  background: #ddd;
+  border-radius: 20px;
+}
+
+.fw{
+  width: 100%;
 }

@@ -41,8 +41,11 @@ export class SwaggerApiController extends BaseController {
         const keysControllers = Object.keys(metadata.controllers);
         keysControllers.forEach((controllerName: string) => {
             const controller = metadata.controllers[controllerName];
-            const keysActions = Object.keys(controller.actions);
+            if (!controller || !controller.actions) {
+                return;
+            }
 
+            const keysActions = Object.keys(controller.actions);
             keysActions.forEach((k) => {
 
                 const action = controller.actions[k];

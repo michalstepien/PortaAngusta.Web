@@ -1,1 +1,53 @@
-<p>main works!</p>
+<div style="height: 100vh">
+    <div fxFlexFill fxLayout="column">
+        <mat-toolbar color="primary" fxFlex="65px">
+            <mat-toolbar-row>
+                <span>Porta angusta</span>
+                <span class="frs"></span>
+                <mat-list class="cp pt-0imp">
+                    <mat-list-item [matMenuTriggerFor]="appMenu">
+                        <img matListAvatar
+                            src="https://secure.gravatar.com/avatar/586c2964670db81665efe9c7ffdbd44f/?s=150&d=https%3A%2F%2Fstatic.thenounproject.com%2Fimg%2Fdefault.jpg">
+                    </mat-list-item>
+                </mat-list>
+                <mat-menu #appMenu="matMenu">
+                    <button mat-menu-item>Settings</button>
+                    <button mat-menu-item>Help</button>
+                </mat-menu>
+            </mat-toolbar-row>
+        </mat-toolbar>
+        <mat-sidenav-container fxFlex="calc(100%-65px)" fxLayout="row">
+            <mat-sidenav fxFlexFill fxFlex="10" fxFlex.xs="0" color="primary" opened mode="side" class="pa-menu">
+                <mat-nav-list>
+                    <a mat-list-item [routerLink]="l.link" *ngFor="let l of menu"> {{ l.name }} </a>
+                    <a mat-list-item [routerLink]="[ { outlets: { side1: ['job'] } }]">outlet job</a>
+                    <a mat-list-item [routerLink]="[ { outlets: { side2: ['script'] } }]">outlet script</a>
+                    <a mat-list-item [routerLink]="[ { outlets: { side1: null, side2: null } }]">outlets close</a>
+                </mat-nav-list>
+            </mat-sidenav>
+
+            <mat-sidenav fxFlexFill
+                [fxFlex]="isActivatedSide1 && isActivatedSide2 ? 60 : (isActivatedSide1 || isActivatedSide2 ? 30 : 0)"
+                fxFlex.xs="100" [opened]="isActivatedSide1 || isActivatedSide2" mode="side" position="end">
+                <mat-sidenav-container fxFlex="100" fxLayout="row">
+                    <mat-sidenav fxFlexFill [fxFlex]="isActivatedSide1 && isActivatedSide2 ? 50 : 100" color="primary"
+                        [opened]="isActivatedSide2" mode="side" class="pa-menu side-outlet">
+                        <router-outlet name="side2" (activate)="isActivatedSide2 = true"
+                            (deactivate)="isActivatedSide2 = false"></router-outlet>
+                    </mat-sidenav>
+                    <mat-sidenav fxFlexFill [fxFlex]="isActivatedSide1 && isActivatedSide2 ? 50 : 100" color="primary"
+                        [opened]="isActivatedSide1" mode="side" class="pa-menu side-outlet" position="end">
+                        <router-outlet name="side1" (activate)="isActivatedSide1 = true"
+                            (deactivate)="isActivatedSide1 = false"></router-outlet>
+                    </mat-sidenav>
+                </mat-sidenav-container>
+            </mat-sidenav>
+            <mat-sidenav-content fxFlexFill
+                [fxFlex]="isActivatedSide1 && isActivatedSide2 ? 30 : (isActivatedSide1 || isActivatedSide2 ? 60 : 90)">
+                <router-outlet></router-outlet>
+            </mat-sidenav-content>
+
+        </mat-sidenav-container>
+    </div>
+</div>
+<!-- https://stackblitz.com/angular/mrjgoovnmgo?file=app%2Fsidenav-responsive-example.ts -->

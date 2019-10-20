@@ -8,6 +8,8 @@ import { app } from '../server';
 import { Auth as AuthProccess } from '../core/auth';
 import Session from '../core/session';
 import connection from '../db';
+import Bull from 'bull';
+
 
 @Controller('users')
 export class UserController extends BaseController {
@@ -344,5 +346,13 @@ export class UserController extends BaseController {
     public async cacheget() {
         const ret = await app.cache.get('dupawolowaTest');
         return { ok: ret };
+    }
+
+    @Get('puppeter/:keyword')
+    @Description('puppeter run')
+    public async puppeter(@Param keyword: string) {
+        const queueSearchEngine = new Bull('queueSearchEngine', 'redis://localhost:6379');
+        queueSearchEngine.add({keyword});
+        return { ok: true };
     }
 }

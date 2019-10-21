@@ -21,6 +21,15 @@ export class Job extends Base<Job> {
     @dbProperty()
     public dateStop: Date;
 
+    @dbProperty()
+    public runType = RunType.manual;
+
+    @dbProperty()
+    public delay = 0;
+
+    @dbProperty()
+    public crone = '';
+
     constructor() {
         super(Job);
     }
@@ -38,4 +47,10 @@ enum JobStatut {
     progress = 3,
     completed = 4,
     failed = 5
+}
+
+enum RunType {
+    manual = 0,
+    crone = 1,
+    delayed = 2
 }

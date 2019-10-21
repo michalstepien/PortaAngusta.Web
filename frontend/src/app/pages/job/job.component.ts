@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { HttpClient } from '@angular/common/http';
-import { Job, JobStatut, JobType } from '../../models/job';
+import { Job, JobStatut, JobType, RunType } from '../../models/job';
 import { ActivatedRoute } from '@angular/router';
 
 @Component({
@@ -19,8 +19,11 @@ export class JobComponent implements OnInit {
   job: Job = {
     name: '',
     description: '',
-    status: 0,
-    typeJob: 1
+    status: JobStatut.waiting,
+    typeJob: JobType.script,
+    runType: RunType.manual,
+    delay: 0,
+    crone: ''
   };
 
   constructor(private snackBar: MatSnackBar, private http: HttpClient, private route: ActivatedRoute) { }

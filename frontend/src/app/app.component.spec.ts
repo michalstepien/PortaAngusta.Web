@@ -6,6 +6,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ErrorInterceptor } from './shared/interceptors/error.interceptor';
 import { JwtInterceptor } from './shared/interceptors/jwt.interceptor';
 import { FlexLayoutModule } from '@angular/flex-layout';
+import { routes } from './app-routing.module';
 
 import { AppComponent } from './app.component';
 
@@ -14,7 +15,7 @@ describe('AppComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         HttpClientTestingModule,
-        RouterTestingModule,
+        RouterTestingModule.withRoutes(routes),
         BrowserAnimationsModule,
         FlexLayoutModule
       ],

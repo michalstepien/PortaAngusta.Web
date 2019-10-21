@@ -7,6 +7,9 @@ export default class Cache {
     private getC: (key: string) => Promise<any>;
     private setC: (key: string, value: any, mode?: string, duration?: number) => Promise<any>;
     private delC: (key: string) => Promise<any>;
+    private getCKeys: (pattern: string) => Promise<any>;
+    private getCValues: (keys: Array<string>) => Promise<any>;
+    private flushC: () => Promise<any>;
 
     public exists: (key: string) => Promise<boolean>;
 
@@ -44,6 +47,16 @@ export default class Cache {
         return p;
     }
 
+    public async getRawValues(): Promise<any> {
+       const keys = await this.getCKeys('*');
+       const values = await this.getCValues(keys);
+       return values;
+    }
+
+    public async flushDB(): Promise<boolean> {
+        return await this.flushC();
+     }
+
 
     public init() {
         try {
@@ -55,6 +68,9 @@ export default class Cache {
             this.setC = promisify(this.client.set).bind(this.client);
             this.delC = promisify(this.client.del).bind(this.client);
             this.exists = promisify(this.client.exists).bind(this.client);
+            this.getCKeys = promisify(this.client.keys).bind(this.client);
+            this.getCValues = promisify(this.client.mget).bind(this.client);
+            this.flushC = promisify(this.client.flushall).bind(this.client);
         } catch (error) {
             console.error(error);
         }

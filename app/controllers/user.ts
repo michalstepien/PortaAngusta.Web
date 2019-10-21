@@ -342,11 +342,19 @@ export class UserController extends BaseController {
     }
 
     @Get('cacheget')
-    @Description('cache get example')
+    @Description('cache get all redis')
     public async cacheget() {
-        const ret = await app.cache.get('dupawolowaTest');
+        const ret = await app.cache.getRawValues();
         return { ok: ret };
     }
+
+    @Get('cacheflush')
+    @Description('cache flush all')
+    public async cacheflush() {
+        const ret = await app.cache.flushDB();
+        return { ok: ret };
+    }
+
 
     @Get('puppeter/:keyword')
     @Description('puppeter run')

@@ -1,8 +1,9 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { RouterTestingModule } from '@angular/router/testing';
+import { routes } from './app-routing.module';
 
-import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FlexLayoutModule } from '@angular/flex-layout';
@@ -17,7 +18,7 @@ import { JwtInterceptor } from './shared/interceptors/jwt.interceptor';
   imports: [
     BrowserModule,
     HttpClientModule,
-    AppRoutingModule,
+    RouterTestingModule.withRoutes(routes),
     BrowserAnimationsModule,
     FlexLayoutModule
   ],

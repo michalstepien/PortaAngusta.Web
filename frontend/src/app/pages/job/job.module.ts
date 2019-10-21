@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 import { JobRoutingModule } from './job-routing.module';
 import { JobComponent } from './job.component';
@@ -12,11 +13,14 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatRadioModule } from '@angular/material/radio';
 
 @NgModule({
   declarations: [JobComponent],
   imports: [
     CommonModule,
+    FormsModule,
     JobRoutingModule,
     MatToolbarModule,
     MatIconModule,
@@ -26,7 +30,9 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
     MatSelectModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatTabsModule,
+    MatRadioModule
   ]
 })
 export class JobModule { }

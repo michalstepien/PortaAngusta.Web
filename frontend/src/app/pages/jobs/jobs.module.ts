@@ -6,6 +6,9 @@ import { JobsComponent } from './jobs.component';
 
 import { MatTableModule } from '@angular/material/table';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatButtonModule } from '@angular/material/button';
+import { MatPaginatorModule } from '@angular/material/paginator';
+
 
 @NgModule({
   declarations: [JobsComponent],
@@ -13,7 +16,9 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
     CommonModule,
     MatTableModule,
     MatCheckboxModule,
-    JobsRoutingModule
+    JobsRoutingModule,
+    MatButtonModule,
+    MatPaginatorModule
   ]
 })
 export class JobsModule { }

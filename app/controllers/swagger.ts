@@ -1,7 +1,5 @@
 import { BaseController, Controller, Get, metadata } from './base';
 import { Base } from '../models/base';
-import { pathToFileURL } from 'url';
-import { stringLiteral } from '@babel/types';
 
 @Controller('swagger-api')
 export class SwaggerApiController extends BaseController {
@@ -96,12 +94,18 @@ export class SwaggerApiController extends BaseController {
                             api.paths[path][action.verb].parameters.push({
                                 name: p.name,
                                 in: 'path',
-                                description: 'How many items to return at one time (max 100)',
+                                description: '',
                                 required: false,
                                 type: 'string'
                             });
                         } else if (p.type === 2) {
-
+                            api.paths[path][action.verb].parameters.push({
+                                name: p.name,
+                                in: 'query',
+                                description: '',
+                                required: false,
+                                type: 'string'
+                            });
                         } else if (p.type === 3) {
                             if (!api.paths[path][action.verb].requestBody) {
                                 api.paths[path][action.verb].requestBody = {

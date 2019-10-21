@@ -2,26 +2,18 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { MatTableDataSource } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
+import { HttpClient } from '@angular/common/http';
+import { PageEvent } from '@angular/material/paginator';
+import { IResults } from '../../interfaces/results';
 
-export interface PeriodicElement {
+export interface Job {
+  id: string;
   name: string;
-  position: number;
-  weight: number;
-  symbol: string;
+  description: string;
+  type: number;
+  status: number;
 }
 
-const ELEMENT_DATA: PeriodicElement[] = [
-  { position: 1, name: 'Hydrogen', weight: 1.0079, symbol: 'H' },
-  { position: 2, name: 'Helium', weight: 4.0026, symbol: 'He' },
-  { position: 3, name: 'Lithium', weight: 6.941, symbol: 'Li' },
-  { position: 4, name: 'Beryllium', weight: 9.0122, symbol: 'Be' },
-  { position: 5, name: 'Boron', weight: 10.811, symbol: 'B' },
-  { position: 6, name: 'Carbon', weight: 12.0107, symbol: 'C' },
-  { position: 7, name: 'Nitrogen', weight: 14.0067, symbol: 'N' },
-  { position: 8, name: 'Oxygen', weight: 15.9994, symbol: 'O' },
-  { position: 9, name: 'Fluorine', weight: 18.9984, symbol: 'F' },
-  { position: 10, name: 'Neon', weight: 20.1797, symbol: 'Ne' },
-];
 
 @Component({
   selector: 'app-jobs',
@@ -30,23 +22,27 @@ const ELEMENT_DATA: PeriodicElement[] = [
 })
 export class JobsComponent implements OnInit {
 
-  displayedColumns: string[] = ['select', 'position', 'name', 'weight', 'symbol'];
-  dataSource = new MatTableDataSource<PeriodicElement>(ELEMENT_DATA);
-  selection = new SelectionModel<PeriodicElement>(true, []);
+  displayedColumns: string[] = ['id', 'name', 'description', 'typeJob', 'status'];
+  dataSource = new MatTableDataSource<Job>([]);
+  selection = new SelectionModel<Job>(true, []);
 
-  constructor(public route: ActivatedRoute) { }
+  length = 0;
+  skip = 0;
+  pageSize = 10;
+  pageSizeOptions: number[] = [5, 10, 25, 100];
+
+  constructor(public route: ActivatedRoute, private http: HttpClient) { }
 
   ngOnInit() {
+    this.loadJobs();
   }
 
-  /** Whether the number of selected elements matches the total number of rows. */
   isAllSelected() {
     const numSelected = this.selection.selected.length;
     const numRows = this.dataSource.data.length;
     return numSelected === numRows;
   }
 
-  /** Selects all rows if they are not all selected; otherwise clear selection. */
   masterToggle() {
     this.isAllSelected() ?
         this.selection.clear() :
@@ -54,10 +50,23 @@ export class JobsComponent implements OnInit {
   }
 
   /** The label for the checkbox on the passed row */
-  checkboxLabel(row?: PeriodicElement): string {
+  checkboxLabel(row?: Job): string {
     if (!row) {
       return `${this.isAllSelected() ? 'select' : 'deselect'} all`;
     }
-    return `${this.selection.isSelected(row) ? 'deselect' : 'select'} row ${row.position + 1}`;
+    return `${this.selection.isSelected(row) ? 'deselect' : 'select'} row ${row.id}`;
   }
+
+  async loadJobs() {
+    const data =  await this.http.get<IResults>('/api/jobs/list?limit=' + this.pageSize + '&skip=' + this.skip).toPromise();
+    this.length = data.count;
+    this.dataSource.data = data.results;
+  }
+
+  changePage(page: PageEvent) {
+    this.pageSize = page.pageSize;
+    this.skip = page.pageIndex * page.pageSize;
+    this.loadJobs();
+  }
+
 }

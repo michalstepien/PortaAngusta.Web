@@ -278,6 +278,10 @@ export class Base<T> {
             if (record['@class'] !== model.dbClass) {
                 throw new DbError('Cannot load db class:' + record['@class'] + ' to: ' + clsName + 'model');
             }
+        } else {
+            if (record.id) {
+                this.id = record.id;
+            }
         }
         const toImp = model.propertiesImport;
         const keysThis = Object.keys(toImp).filter((x: string) => x !== 'id');

@@ -3,6 +3,12 @@ import 'reflect-metadata';
 import { Base } from '../models/base';
 import * as babel from '@babel/parser';
 import { AuthMiddleware } from '../core/auth';
+import { Interface } from 'readline';
+
+export interface IResults {
+    count: number;
+    results: Array<any>;
+}
 
 export const metadata: any = {
     controllers: {}
@@ -222,15 +228,21 @@ export class BaseController {
                     if (action.params) {
                         action.params.forEach((mp: any) => {
                             if (action.verb === 'get' || action.verb === 'delete') {
-                                let val = req.params[mp.name];
-                                if (val !== undefined && val !== null) {
-                                    if (mp.type === 'number') {
-                                        val = Number(val);
-                                    } else if (mp.type === 'Date') {
-                                        val = new Date(val);
-                                    }
+                                if (mp.type === 2) {
+                                    const val = req.query[mp.name];
+                                    fPrams.push(val);
+                                } else {
+                                    // TO DO
+                                    const val = req.params[mp.name];
+                                    // if (val !== undefined && val !== null) {
+                                    //     if (mp.type === 'number') {
+                                    //         val = Number(val);
+                                    //     } else if (mp.type === 'Date') {
+                                    //         val = new Date(val);
+                                    //     }
+                                    // }
+                                    fPrams.push(val);
                                 }
-                                fPrams.push(val);
                             } else if (action.verb === 'post' || action.verb === 'put') {
                                 fPrams.push(req.body[mp.name]);
                             }

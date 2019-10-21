@@ -19,10 +19,10 @@
         <mat-sidenav-container fxFlex="calc(100%-65px)" fxLayout="row">
             <mat-sidenav fxFlexFill fxFlex="10" fxFlex.xs="0" color="primary" opened mode="side" class="pa-menu">
                 <mat-nav-list>
-                    <a mat-list-item [routerLink]="l.link" *ngFor="let l of menu"> {{ l.name }} </a>
-                    <a mat-list-item [routerLink]="[ { outlets: { side1: ['job'] } }]">outlet job</a>
+                    <a mat-list-item [routerLink]="l.link" routerLinkActive="list-item-active" *ngFor="let l of menu"> {{ l.name }} </a>
+                    <!-- <a mat-list-item [routerLink]="[ { outlets: { side1: ['job'] } }]">outlet job</a>
                     <a mat-list-item [routerLink]="[ { outlets: { side2: ['script'] } }]">outlet script</a>
-                    <a mat-list-item [routerLink]="[ { outlets: { side1: null, side2: null } }]">outlets close</a>
+                    <a mat-list-item [routerLink]="[ { outlets: { side1: null, side2: null } }]">outlets close</a> -->
                 </mat-nav-list>
             </mat-sidenav>
 

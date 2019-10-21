@@ -1,6 +1,6 @@
 <div class="spinner-wrapper" *ngIf="loader">
-    <mat-progress-spinner color="primary" mode="indeterminate" class="center-spinner">
-      </mat-progress-spinner>
+  <mat-progress-spinner color="primary" mode="indeterminate" class="center-spinner">
+  </mat-progress-spinner>
 </div>
 
 <div class="page-wrap">
@@ -9,34 +9,59 @@
       <mat-toolbar-row>
         <span>Job</span>
         <span class="frs"></span>
-        <mat-icon  matTooltip="Close" matTooltipPosition="left" class="cp" [routerLink]="[ '../', { outlets: { side1: null } }]">close</mat-icon>
+        <mat-icon matTooltip="Close" matTooltipPosition="left" class="cp"
+          [routerLink]="[ '../../', { outlets: { side1: null } }]">close</mat-icon>
       </mat-toolbar-row>
     </mat-toolbar>
   </header>
   <main class="content p-15">
     <form class="example-form">
       <mat-form-field class="fw">
-        <input matInput placeholder="Name of job" value="Some Job">
+        <input matInput placeholder="Name of job" name="name" [(ngModel)]="job.name">
       </mat-form-field>
 
       <mat-form-field class="fw">
-        <textarea matInput mat-autosize placeholder="Write a description"></textarea>
+        <textarea matInput mat-autosize name="description" [(ngModel)]="job.description"
+          placeholder="Write a description"></textarea>
       </mat-form-field>
 
       <mat-form-field class="fw">
-          <mat-select>
-            <mat-option *ngFor="let f of types" [value]="f.value">
-              {{f.text}}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
+        <mat-select [(ngModel)]="job.typeJob" name="typejob">
+          <mat-option *ngFor="let f of types" [value]="f.value">
+            {{f.text}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-tab-group animationDuration="0ms" class="fw">
+        <mat-tab label="Running options">
+          <mat-radio-group aria-labelledby="example-radio-group-label" class="example-radio-group">
+            <mat-radio-button class="example-radio-button" [value]="1">
+              Manual
+            </mat-radio-button>
+            <mat-radio-button class="example-radio-button" [value]="2">
+                Crone
+            </mat-radio-button>
+            <mat-radio-button class="example-radio-button" [value]="3">
+                Delayed
+            </mat-radio-button>
+          </mat-radio-group>
+        </mat-tab>
+        <mat-tab label="Inputs">
+
+        </mat-tab>
+        <mat-tab label="Outputs">
+
+        </mat-tab>
+      </mat-tab-group>
     </form>
   </main>
   <footer>
     <mat-toolbar color="secondary">
       <mat-toolbar-row>
         <button mat-raised-button color="accent" class="mr-15" (click)="save()">Save</button>
-        <button mat-raised-button color="primary" [routerLink]="[ '../', { outlets: { side1: null } }]">Cancel</button>
+        <button mat-raised-button color="primary"
+          [routerLink]="[ '../../', { outlets: { side1: null } }]">Cancel</button>
       </mat-toolbar-row>
     </mat-toolbar>
   </footer>

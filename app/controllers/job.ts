@@ -1,5 +1,6 @@
 import { BaseController, Controller, Get, Post, Description, Return, Param, Query, Body, IResults } from './base';
-import { Job } from '../models/job';
+import { Job, JobType } from '../models/job';
+import Bull from 'bull';
 
 @Controller('jobs')
 export class JobController extends BaseController {
@@ -32,6 +33,19 @@ export class JobController extends BaseController {
         j.importRecord(job, 'Job');
         await j.save();
         return await j.load();
+    }
+
+    @Description('Run job')
+    @Get('job/run/:id')
+    public async runJob(@Param id: string): Promise<any> {
+        const j: Job = new Job();
+        j.id = id;
+        const r = await j.load();
+        if (r.typeJob === JobType.search) {
+            const queueSearchEngine = new Bull('queueSearchEngine', 'redis://localhost:6379');
+            await queueSearchEngine.add({id: j.id, settings: r.searchSettings});
+        }
+        return {ok: true};
     }
 
 }

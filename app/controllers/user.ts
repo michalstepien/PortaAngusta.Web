@@ -2,9 +2,9 @@ import { Company } from '../models/company';
 import { Address } from '../models/address';
 import { User } from '../models/user';
 import { Jdg } from '../clusters/jdg';
-import { BaseController, Controller, Auth, Delete, Get, Post, Put, Description, Query, Param, Body, Return, Plain } from './base';
+import { BaseController, Controller, Authorize, Delete, Get, Post, Put, Description, Query, Param, Body, Return, Plain } from './base';
 import Utils from '../core/utils';
-import { app } from '../server';
+import cache from '../core/cache';
 import { Auth as AuthProccess } from '../core/auth';
 import Session from '../core/session';
 import connection from '../db';
@@ -89,7 +89,7 @@ export class UserController extends BaseController {
         return c;
     }
 
-    @Auth()
+    @Authorize()
     @Get('addresssave')
     @Description('Save address')
     @Return(Company)
@@ -264,7 +264,7 @@ export class UserController extends BaseController {
         return { selectFromLink: ret, sizeCollection: ret2, selectFirst: ret3, selectFirstName: ret4 };
     }
 
-    @Auth()
+    @Authorize()
     @Get('linqdelete')
     @Description('linq delete example')
     @Return(Company)
@@ -337,21 +337,21 @@ export class UserController extends BaseController {
     @Get('cacheset')
     @Description('cache set example')
     public async cache() {
-        await app.cache.set('dupawolowaTest', { piesek: 'leszek', kon: 'rafał' });
+        await cache.set('dupawolowaTest', { piesek: 'leszek', kon: 'rafał' });
         return { ok: false };
     }
 
     @Get('cacheget')
     @Description('cache get all redis')
     public async cacheget() {
-        const ret = await app.cache.getRawValues();
+        const ret = await cache.getRawValues();
         return { ok: ret };
     }
 
     @Get('cacheflush')
     @Description('cache flush all')
     public async cacheflush() {
-        const ret = await app.cache.flushDB();
+        const ret = await cache.flushDB();
         return { ok: ret };
     }
 

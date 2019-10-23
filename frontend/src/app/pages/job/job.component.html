@@ -35,19 +35,42 @@
 
       <mat-tab-group animationDuration="0ms" class="fw">
         <mat-tab label="Running options">
-          <mat-radio-group name="runType" [(ngModel)]="job.runType" aria-labelledby="example-radio-group-label" class="example-radio-group">
-            <mat-radio-button class="example-radio-button" [value]="1">
+          <mat-radio-group name="runType" [(ngModel)]="job.runType" aria-labelledby="example-radio-group-label"
+            class="example-radio-group">
+            <mat-radio-button class="example-radio-button" [value]="0">
               Manual
             </mat-radio-button>
-            <mat-radio-button class="example-radio-button" [value]="2">
-                Crone
+            <mat-radio-button class="example-radio-button" [value]="1">
+              Crone
             </mat-radio-button>
-            <mat-radio-button class="example-radio-button" [value]="3">
-                Delayed
+            <mat-radio-button class="example-radio-button" [value]="2">
+              Delayed
             </mat-radio-button>
           </mat-radio-group>
         </mat-tab>
         <mat-tab label="Inputs">
+          <mat-form-field class="fw pt-15">
+            <mat-select name="searchTypes" [(ngModel)]="job.searchSettings.searchEngines" multiple>
+              <mat-option *ngFor="let f of searchTypes" [value]="f.value">
+                {{f.text}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field class="">
+            <mat-chip-list #chipList aria-label="Keyword selection">
+              <mat-chip *ngFor="let k of job?.searchSettings?.keywords" [selectable]="selectable" [removable]="removable"
+                (removed)="remove(k)">
+                {{k}}
+                <mat-icon matChipRemove *ngIf="removable">cancel</mat-icon>
+              </mat-chip>
+              <input placeholder="New keyword..." [matChipInputFor]="chipList"
+                [matChipInputSeparatorKeyCodes]="separatorKeysCodes" [matChipInputAddOnBlur]="addOnBlur"
+                (matChipInputTokenEnd)="add($event)">
+            </mat-chip-list>
+          </mat-form-field>
+          <mat-form-field class="fw">
+              <input type="number" matInput placeholder="Number of pages"  [(ngModel)]="job.searchSettings.numberPages" name="numpages">
+          </mat-form-field>
 
         </mat-tab>
         <mat-tab label="Outputs">
@@ -62,6 +85,7 @@
         <button mat-raised-button color="accent" class="mr-15" (click)="save()">Save</button>
         <button mat-raised-button color="primary"
           [routerLink]="[ '../../', { outlets: { side1: null } }]">Cancel</button>
+        <button mat-raised-button color="warn" class="mr-15" (click)="run()">Run</button>
       </mat-toolbar-row>
     </mat-toolbar>
   </footer>

@@ -15,6 +15,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatRadioModule } from '@angular/material/radio';
+import { MatChipsModule } from '@angular/material/chips';
+
 
 @NgModule({
   declarations: [JobComponent],
@@ -32,7 +34,8 @@ import { MatRadioModule } from '@angular/material/radio';
     MatTooltipModule,
     MatSnackBarModule,
     MatTabsModule,
-    MatRadioModule
+    MatRadioModule,
+    MatChipsModule
   ]
 })
 export class JobModule { }

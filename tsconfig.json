@@ -25,5 +25,8 @@
   },
   "include": [
     "app/**/*"
+  ],
+  "exclude": [
+    "app/jobQueue/**/*"
   ]
 }

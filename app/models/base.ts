@@ -2,7 +2,7 @@ import 'reflect-metadata';
 import connection from '../db';
 import Cluster from '../clusters/base';
 import Collection from '../core/linq';
-import { app } from '../server';
+import cache from '../core/cache';
 import crypto from 'crypto';
 
 const dbPropertyMetadataKey = Symbol('dbProperty');
@@ -269,15 +269,16 @@ export class Base<T> {
     // private
 
     public importRecord(record: any, className: string = null) {
-        const clsName =  className || this.constructor.name;
+        const clsName = className || this.constructor.name;
         const model = metadataModel.model[clsName];
         if (!className) {
             if (record['@rid']) {
                 this.id = record['@rid'].cluster + ':' + record['@rid'].position;
             }
-            if (record['@class'] !== model.dbClass) {
-                throw new DbError('Cannot load db class:' + record['@class'] + ' to: ' + clsName + 'model');
-            }
+            // maybe embeded???
+            // if (record['@class'] !== model.dbClass) {
+            //     throw new DbError('Cannot load db class:' + record['@class'] + ' to: ' + clsName + ' model');
+            // }
         } else {
             if (record.id) {
                 this.id = record.id;
@@ -339,7 +340,7 @@ export class Base<T> {
         });
 
         if (model.extendedClass && model.extendedClass !== 'Base') {
-           this.importRecord(record, model.extendedClass);
+            this.importRecord(record, model.extendedClass);
         }
         return this as any;
     }
@@ -381,19 +382,19 @@ export class Base<T> {
         keys.forEach((k) => {
             if (toExport[k].type === dbTypes.Link) {
                 if (that[k] && that[k].id) {
-                    r[k] = { '@rid':  ({'@rid': '#' + that[k].id})};
+                    r[k] = { '@rid': ({ '@rid': '#' + that[k].id }) };
                 } else {
                     r[k] = null;
                 }
             } else if (toExport[k].type === dbTypes.LinkList) {
                 if (that[k]) {
-                    r[k] = that[k].map((e: any) => ({'@rid': '#' + e.id}));
+                    r[k] = that[k].map((e: any) => ({ '@rid': '#' + e.id }));
                 } else {
                     r[k] = [];
                 }
             } else if (toExport[k].type === dbTypes.LinkSet) {
                 if (that[k]) {
-                    r[k] = [...that[k]].map((e: any) => ({'@rid': '#' + e.id}));
+                    r[k] = [...that[k]].map((e: any) => ({ '@rid': '#' + e.id }));
                 } else {
                     r[k] = [];
                 }
@@ -401,7 +402,7 @@ export class Base<T> {
                 if (that[k]) {
                     const p: any = {};
                     that[k].forEach((val: any, key: any) => {
-                        p[key] = {'@rid': '#' + val.id };
+                        p[key] = { '@rid': '#' + val.id };
                     });
                     r[k] = p;
                 } else {
@@ -442,37 +443,37 @@ export class Base<T> {
         return { keys: mapKeys[retName] || [], values: ret[s] || [] };
     }
 
-    public collection(cache: boolean = false): Collection<T> {
+    public collection(cached: boolean = false): Collection<T> {
         return new Collection<T>(this.dbClass(), async (cmd: string, projection: boolean, oneRecord: boolean, params: any) => {
             let hasCasched = false;
             let qret = null;
             const hash = crypto.createHash('md5').update(cmd).digest('hex');
-            if (cache) {
-                if (await app.cache.exists(hash)) {
+            if (cached) {
+                if (await cache.exists(hash)) {
                     hasCasched = true;
-                    qret = await app.cache.get(hash);
+                    qret = await cache.get(hash);
                 }
             }
             if (!hasCasched) {
                 const ses = await connection.ses();
-                qret = await ses.command(cmd, {params}).all();
+                qret = await ses.command(cmd, { params }).all();
                 ses.close();
             }
             if (projection) {
                 if (oneRecord) {
-                    if (cache && !hasCasched) {
-                        await app.cache.set(hash, qret[0].onerec);
+                    if (cached && !hasCasched) {
+                        await cache.set(hash, qret[0].onerec);
                     }
                     return qret[0].onerec;
                 } else {
-                    if (cache && !hasCasched) {
-                        await app.cache.set(hash, qret);
+                    if (cached && !hasCasched) {
+                        await cache.set(hash, qret);
                     }
                     return qret;
                 }
             } else {
-                if (cache && !hasCasched) {
-                    await app.cache.set(hash, qret);
+                if (cached && !hasCasched) {
+                    await cache.set(hash, qret);
                 }
                 const elements: T[] = [];
                 qret.forEach((element: any) => {
@@ -485,13 +486,13 @@ export class Base<T> {
         }, async (cmd: string, params: any) => {
             const ses = await connection.ses();
             console.log(cmd);
-            const qret = await ses.command(cmd, {params}).all();
+            const qret = await ses.command(cmd, { params }).all();
             ses.close();
             return qret;
         }, async (cmd: string, params: any) => {
             const ses = await connection.ses();
             console.log(cmd);
-            const qret = await ses.command(cmd, {params}).all();
+            const qret = await ses.command(cmd, { params }).all();
             ses.close();
             return qret;
         });
@@ -523,10 +524,10 @@ declare global {
         hash(): string;
     }
     type Unpacked<T> =
-    T extends (infer U)[] ? U[] :
-    // tslint:disable-next-line:no-shadowed-variable
-    T extends (...args: any[]) => infer U ? U :
-    // tslint:disable-next-line:no-shadowed-variable
-    T extends Promise<infer U> ? U :
-    T;
+        T extends (infer U)[] ? U[] :
+        // tslint:disable-next-line:no-shadowed-variable
+        T extends (...args: any[]) => infer U ? U :
+        // tslint:disable-next-line:no-shadowed-variable
+        T extends Promise<infer U> ? U :
+        T;
 }

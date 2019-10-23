@@ -1,4 +1,5 @@
-import { Base, dbProperty, ModelClass } from './base';
+import { Base, dbProperty, ModelClass, dbTypes } from './base';
+import { SearchSettings } from './searchSettings';
 
 @ModelClass('Job')
 export class Job extends Base<Job> {
@@ -30,17 +31,20 @@ export class Job extends Base<Job> {
     @dbProperty()
     public crone = '';
 
+    @dbProperty(null, dbTypes.Embedded, SearchSettings)
+    public searchSettings: SearchSettings = null;
+
     constructor() {
         super(Job);
     }
 }
 
-enum JobType {
+export enum JobType {
     script = 0,
     search = 1
 }
 
-enum JobStatut {
+export enum JobStatut {
     waiting = 0,
     active = 1,
     stalled = 2,
@@ -49,7 +53,7 @@ enum JobStatut {
     failed = 5
 }
 
-enum RunType {
+export enum RunType {
     manual = 0,
     crone = 1,
     delayed = 2

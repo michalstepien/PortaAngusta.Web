@@ -3,9 +3,7 @@ import express from 'express';
 import swaggerUi from 'swagger-ui-express';
 import connection from './db';
 import LiveQueries from './db/live';
-import {Company} from './models/company';
 import createController from './routes';
-import Cache from './core/cache';
 import Session from './core/session';
 import process from 'process';
 
@@ -15,7 +13,7 @@ class App {
     public app: express.Application;
     private port = process.env.SERVER_HTTP_PORT;
     private lq: LiveQueries = null;
-    public cache: Cache;
+
 
     constructor() {
         this.app = express();
@@ -25,13 +23,13 @@ class App {
     public async initialize(): Promise<any> {
         this.onExit();
         await this.initDB();
-        this.initCache();
-        this.app.use(await createController());
+        // ;
         await this.app.listen(this.port);
         console.log('\x1b[36m%s\x1b[0m', `SERVER STARTED at http://localhost:${this.port}`);
 
         this.configSwagger();
         await this.configLiveQueries();
+        await this.app.use(await createController());
 
         return this.app;
     }
@@ -64,24 +62,15 @@ class App {
 
     private async configLiveQueries() {
         this.lq = new LiveQueries();
-        const c = new Company();
-        await this.lq.subscribe(c);
-        this.lq.on(c, (data: any) => {
-        });
+        // const c = new Company();
+        // await this.lq.subscribe(c);
+        // this.lq.on(c, (data: any) => {
+        // });
     }
 
     private async initDB(): Promise<any> {
         await connection.init();
         await connection.ses();
-    }
-
-    private initCache() {
-        try {
-            this.cache = new Cache();
-            this.cache.init();
-        } catch (e) {
-            console.error(e);
-        }
     }
 
     private onExit() {

@@ -2,8 +2,8 @@ import express from 'express';
 import 'reflect-metadata';
 import { Base } from '../models/base';
 import * as babel from '@babel/parser';
-import { AuthMiddleware } from '../core/auth';
-import { Interface } from 'readline';
+import { Auth } from '../core/auth';
+import Session from '../core/session';
 
 export interface IResults {
     count: number;
@@ -59,7 +59,7 @@ export function Description(description: string) {
     };
 }
 
-export function Auth(isAuth: boolean = true) {
+export function Authorize(isAuth: boolean = true) {
     return (object: any, methodName: string) => {
         const controller = metadata.controllers[object.constructor.name] || {};
         controller.actions = controller.actions || {};
@@ -189,9 +189,46 @@ function _addDescription({ object, methodName, description }: any) {
     controller.actions[methodName].description = description;
 }
 
+
+
+export class AuthMiddleware {
+    public static checkToken = (req: any, res: any, next: any) => {
+        let token = req.headers['x-access-token'] || req.headers.authorization;
+        if (token && token.startsWith('Bearer ')) {
+            token = token.slice(7, token.length);
+        }
+
+        if (token) {
+            const a = new Auth();
+            a.verify(token).then((ret) => {
+                if (ret) {
+                    Session.set('user', ret);
+                    req.decoded = ret;
+                    next();
+                } else {
+                    return res.json({
+                        success: false,
+                        message: 'Token is not valid'
+                    });
+                }
+            });
+        } else {
+            return res.json({
+                success: false,
+                message: 'Auth token is not supplied'
+            });
+        }
+    }
+}
+
+
 export class BaseController {
 
     public metadata: any = {};
+
+    static noop(): any {
+        return null;
+    }
 
     public generateRoutes(router: express.Router | any) {
         const controller = metadata.controllers[this.constructor.name];
@@ -300,3 +337,4 @@ export class BaseControllerOf<T> extends BaseController {
     }
 
 }
+

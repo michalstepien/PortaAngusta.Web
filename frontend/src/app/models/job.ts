@@ -1,3 +1,5 @@
+import { SearchSettings } from './searchSettings';
+
 export enum JobType {
     script = 0,
     search = 1
@@ -28,6 +30,7 @@ export class Job {
     public runType = RunType.manual;
     public delay = 0;
     public crone = '';
+    public searchSettings: SearchSettings = null;
 
     constructor() {
     }

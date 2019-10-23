@@ -7,6 +7,7 @@
     "create_db": "node dist/db/create_db.js",
     "prebuild": "tslint -c tslint.json -p tsconfig.json --fix",
     "build": "tsc -p tsconfig.json --outDir dist",
+    "build-queue": "tsc -p jobQueue/tsconfig.json --outDir dist/jobQueue",
     "debug": "node --nolazy --inspect-brk=9229 dist/index.js",
     "prestart": "npm run build",
     "test": "nyc mocha --exit",
@@ -14,7 +15,8 @@
     "start": "node dist/index.js",
     "start_frontend": "cd frontend & npm run startp",
     "watch": "concurrently \"nodemon\" \"npm run start_frontend\"",
-    "queue": "node dist/jobQueue/runner.js"
+    "queue": "node dist/jobQueue/jobQueue/runner.js",
+    "checkdep": "madge --circular dist"
   },
   "author": "Michal Stepien",
   "license": "ISC",

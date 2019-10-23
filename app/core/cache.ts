@@ -1,7 +1,7 @@
 import redis from 'redis';
 import { promisify } from 'util';
 
-export default class Cache {
+class Cache {
 
     private client: redis.RedisClient;
     private getC: (key: string) => Promise<any>;
@@ -76,3 +76,8 @@ export default class Cache {
         }
     }
 }
+
+const cache = new Cache();
+cache.init();
+
+export default cache;

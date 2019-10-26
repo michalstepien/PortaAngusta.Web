@@ -47,7 +47,18 @@
               Delayed
             </mat-radio-button>
           </mat-radio-group>
+          <ng-template  [ngIf]="job.runType == 1">
+            <mat-form-field class="fw">
+              <input matInput placeholder="Cron command ex. 1 0 * * *" name="cron" [(ngModel)]="job.crone">
+            </mat-form-field>
+          </ng-template>
+          <ng-template  [ngIf]="job.runType == 2">
+            <mat-form-field class="fw">
+              <input matInput placeholder="Delay seconds" name="delay" [(ngModel)]="job.delay">
+            </mat-form-field>
+          </ng-template> 
         </mat-tab>
+        <!-- INPUTS -->
         <mat-tab label="Inputs">
           <mat-form-field class="fw pt-15">
             <mat-select name="searchTypes" [(ngModel)]="job.searchSettings.searchEngines" multiple>
@@ -56,10 +67,10 @@
               </mat-option>
             </mat-select>
           </mat-form-field>
-          <mat-form-field class="">
+          <mat-form-field class="w-80">
             <mat-chip-list #chipList aria-label="Keyword selection">
-              <mat-chip *ngFor="let k of job?.searchSettings?.keywords" [selectable]="selectable" [removable]="removable"
-                (removed)="remove(k)">
+              <mat-chip *ngFor="let k of job?.searchSettings?.keywords" [selectable]="selectable"
+                [removable]="removable" (removed)="remove(k)">
                 {{k}}
                 <mat-icon matChipRemove *ngIf="removable">cancel</mat-icon>
               </mat-chip>
@@ -69,14 +80,56 @@
             </mat-chip-list>
           </mat-form-field>
           <mat-form-field class="fw">
-              <input type="number" matInput placeholder="Number of pages"  [(ngModel)]="job.searchSettings.numberPages" name="numpages">
+            <input type="number" matInput placeholder="Number of pages" [(ngModel)]="job.searchSettings.numberPages"
+              name="numpages">
           </mat-form-field>
 
         </mat-tab>
+        <!-- OUTPUTS -->
         <mat-tab label="Outputs">
-
+          <mat-form-field class="fw">
+            <mat-select name="searchOutputType" [(ngModel)]="job.searchSettings.outputs" multiple>
+              <mat-option *ngFor="let f of searchOutputType" [value]="f.value">
+                {{f.text}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
         </mat-tab>
       </mat-tab-group>
+      <mat-divider></mat-divider>
+      <mat-accordion class="pt-15">
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              Job results/history
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <table mat-table [dataSource]="jobResultHist" class="mat-elevation-z8" style="width: 100%;">
+            <ng-container matColumnDef="id">
+              <th mat-header-cell *matHeaderCellDef> No. </th>
+              <td mat-cell *matCellDef="let element"> <a
+                  [routerLink]="['/app/searchresults', element.id]">{{element.id}}</a> </td>
+            </ng-container>
+
+            <ng-container matColumnDef="start">
+              <th mat-header-cell *matHeaderCellDef> Start </th>
+              <td mat-cell *matCellDef="let element"> {{element.start | date:'short'}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="end">
+              <th mat-header-cell *matHeaderCellDef> End </th>
+              <td mat-cell *matCellDef="let element"> {{element.end | date:'short'}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="count">
+              <th mat-header-cell *matHeaderCellDef> Count </th>
+              <td mat-cell *matCellDef="let element"> {{element.count}} </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
+        </mat-expansion-panel>
+      </mat-accordion>
     </form>
   </main>
   <footer>
@@ -85,6 +138,7 @@
         <button mat-raised-button color="accent" class="mr-15" (click)="save()">Save</button>
         <button mat-raised-button color="primary"
           [routerLink]="[ '../../', { outlets: { side1: null } }]">Cancel</button>
+        <span class="frs"></span>
         <button mat-raised-button color="warn" class="mr-15" (click)="run()">Run</button>
       </mat-toolbar-row>
     </mat-toolbar>

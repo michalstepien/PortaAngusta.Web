@@ -10,6 +10,9 @@ export class SearchSettings extends Base<SearchSettings> {
     @dbProperty(null, dbTypes.EmbeddedList, 'string')
     public searchEngines: Unpacked<string[]>  = [];
 
+    @dbProperty(null, dbTypes.EmbeddedList, 'short')
+    public outputs: Unpacked<number[]>  = [];
+
     @dbProperty()
     public numberPages = 1;
 

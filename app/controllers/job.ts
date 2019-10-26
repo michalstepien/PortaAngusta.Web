@@ -1,5 +1,6 @@
 import { BaseController, Controller, Get, Post, Description, Return, Param, Query, Body, IResults } from './base';
-import { Job, JobType } from '../models/job';
+import { Job, JobType, RunType } from '../models/job';
+import { JobResults } from '../models/jobResults';
 import Bull from 'bull';
 
 @Controller('jobs')
@@ -25,6 +26,21 @@ export class JobController extends BaseController {
         };
     }
 
+    @Description('Get jobs from DB')
+    @Get('results/list/:id')
+    @Return(Job)
+    public async getResults(@Param id: string): Promise<IResults> {
+        return {
+            count: await new JobResults().collection().where(x => x.job.id === id, {id}).count().executeProjection(),
+            results: await new JobResults().collection().select(x => ({
+                id: x.id.replace('#', ''),
+                start: x.dateStart,
+                end: x.dateStop,
+                count: x.results.size()
+            })).where(x => x.job.id === id, {id}).orderBy(t => t.dateStop, true).executeProjection()
+        };
+    }
+
     @Description('Save job to DB')
     @Post('job')
     @Return(Job)
@@ -43,7 +59,13 @@ export class JobController extends BaseController {
         const r = await j.load();
         if (r.typeJob === JobType.search) {
             const queueSearchEngine = new Bull('queueSearchEngine', 'redis://localhost:6379');
-            await queueSearchEngine.add({id: j.id, settings: r.searchSettings});
+            if (j.runType === RunType.manual ) {
+                await queueSearchEngine.add({id: j.id, settings: r.searchSettings});
+            } else if ( j.runType === RunType.crone ) {
+                await queueSearchEngine.add({id: j.id, settings: r.searchSettings}, { repeat: {cron: j.crone} });
+            } else if ( j.runType === RunType.delayed ) {
+                await queueSearchEngine.add({id: j.id, settings: r.searchSettings}, { delay: j.delay });
+            }
         }
         return {ok: true};
     }

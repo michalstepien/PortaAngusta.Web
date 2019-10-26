@@ -19,7 +19,8 @@ export default class Collection<T> {
     private whereQuery: (t: T) => boolean;
     private params: any;
     private luceneSearchIndexQuery: (t: T, isTrue?: boolean) => any;
-    private orderByQuery: (t: T) => any;
+    private orderByQuery: (t: T, desc?: boolean) => any;
+    private orderByDesc: boolean;
     private groupByQuery: (t: T) => any;
     private countFunct: (t: T) => any;
     private varianceFunct: (t: T) => any;
@@ -44,7 +45,7 @@ export default class Collection<T> {
                 executefn: (cmd: string, projection: boolean, oneRecord: boolean, params: any) => Promise<T[]>,
                 deletefn: (cmd: string, params: any) => Promise<number>,
                 updatefn: (cmd: string, params: any) => Promise<number>,
-                ) {
+    ) {
         this.className = classn;
         this.executionFunction = executefn;
         this.deleteFunction = deletefn;
@@ -62,8 +63,9 @@ export default class Collection<T> {
         return this;
     }
 
-    public orderBy(query: (t: T) => any): Collection<T> {
+    public orderBy(query: (t: T) => any, desc: boolean = false): Collection<T> {
         this.orderByQuery = query;
+        this.orderByDesc = desc;
         return this;
     }
 
@@ -156,7 +158,7 @@ export default class Collection<T> {
         }
 
         let ret = '';
-        if (action === sqlActionType.select ) {
+        if (action === sqlActionType.select) {
             ret = 'SELECT ' + selectString + ' FROM ' + this.className + ' ';
         } else if (action === sqlActionType.delete) {
             ret = 'DELETE FROM ' + this.className + ' ';
@@ -168,7 +170,7 @@ export default class Collection<T> {
             ret += ' WHERE ' + whereString;
         }
         if (orderByString.length > 0) {
-            ret += ' ORDER BY ' + orderByString;
+            ret += ' ORDER BY ' + orderByString + (this.orderByDesc ? ' DESC' : 'ASC');
         }
         if (groupByString.length > 0) {
             ret += ' GROUP BY ' + groupByString;
@@ -211,10 +213,10 @@ export default class Collection<T> {
                 const paExpr = expr as ts.PropertyAccessExpression;
                 const parent = paExpr.expression;
                 let t = '';
-                if ( parent && parent.kind !== ts.SyntaxKind.Identifier) {
+                if (parent && parent.kind !== ts.SyntaxKind.Identifier) {
                     t = this.toSql(parent) + '.';
                 }
-                return t + paExpr.name.text;
+                return t + (paExpr.name.text === 'id' ? '@rid' : paExpr.name.text);
             case ts.SyntaxKind.ParenthesizedExpression:
                 const parExpr = expr as ts.ParenthesizedExpression;
 
@@ -360,14 +362,14 @@ export default class Collection<T> {
                     }
                 }).join(',\n');
             case ts.SyntaxKind.ElementAccessExpression:
-                    const paExpr2 = expr as ts.ElementAccessExpression;
-                    const parent2 = paExpr2.expression;
-                    let t2 = '';
-                    if (parent2 && parent2.kind !== ts.SyntaxKind.Identifier) {
-                        t2 = this.toSql(parent2);
-                    }
-                    const n = paExpr2.argumentExpression as ts.NumericLiteral;
-                    return t2 + '[' + n.text + ']';
+                const paExpr2 = expr as ts.ElementAccessExpression;
+                const parent2 = paExpr2.expression;
+                let t2 = '';
+                if (parent2 && parent2.kind !== ts.SyntaxKind.Identifier) {
+                    t2 = this.toSql(parent2);
+                }
+                const n = paExpr2.argumentExpression as ts.NumericLiteral;
+                return t2 + '[' + n.text + ']';
             case ts.SyntaxKind.Identifier:
                 const paExpr4 = expr as ts.Identifier;
                 return ':' + paExpr4.escapedText;
@@ -387,7 +389,7 @@ export default class Collection<T> {
                 const paExpr = expr as ts.PropertyAccessExpression;
                 const parent = paExpr.expression;
                 let t = '';
-                if ( parent && parent.kind !== ts.SyntaxKind.Identifier) {
+                if (parent && parent.kind !== ts.SyntaxKind.Identifier) {
                     t = this.toSql(parent) + '.';
                 }
                 return t + paExpr.name.text;
@@ -536,14 +538,14 @@ export default class Collection<T> {
                     }
                 }).join(',\n');
             case ts.SyntaxKind.ElementAccessExpression:
-                    const paExpr2 = expr as ts.ElementAccessExpression;
-                    const parent2 = paExpr2.expression;
-                    let t2 = '';
-                    if (parent2 && parent2.kind !== ts.SyntaxKind.Identifier) {
-                        t2 = this.toSql(parent2);
-                    }
-                    const n = paExpr2.argumentExpression as ts.NumericLiteral;
-                    return t2 + '[' + n.text + ']';
+                const paExpr2 = expr as ts.ElementAccessExpression;
+                const parent2 = paExpr2.expression;
+                let t2 = '';
+                if (parent2 && parent2.kind !== ts.SyntaxKind.Identifier) {
+                    t2 = this.toSql(parent2);
+                }
+                const n = paExpr2.argumentExpression as ts.NumericLiteral;
+                return t2 + '[' + n.text + ']';
             default:
                 console.log(expr.kind);
                 return '[undefined]';

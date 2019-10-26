@@ -448,6 +448,7 @@ export class Base<T> {
             let hasCasched = false;
             let qret = null;
             const hash = crypto.createHash('md5').update(cmd).digest('hex');
+            console.log(cmd);
             if (cached) {
                 if (await cache.exists(hash)) {
                     hasCasched = true;

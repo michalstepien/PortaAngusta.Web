@@ -1,0 +1,27 @@
+<div class="p-15">
+    <table mat-table [dataSource]="dataSource" class="mat-elevation-z8" style="width: 100%;">
+
+        <ng-container matColumnDef="keyword">
+            <th mat-header-cell *matHeaderCellDef> Keyword </th>
+            <td mat-cell *matCellDef="let element" class="p-10"> {{element.keyword}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="title">
+            <th mat-header-cell *matHeaderCellDef> Title </th>
+            <td mat-cell *matCellDef="let element" class="p-10"> {{element.title}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="link">
+            <th mat-header-cell *matHeaderCellDef> Link </th>
+            <td mat-cell *matCellDef="let element" class="p-10 txt-overflow"> <a href="{{element.link}}">{{element.link}}</a> </td>
+        </ng-container>
+
+        <ng-container matColumnDef="snippet">
+            <th mat-header-cell *matHeaderCellDef> Snippet </th>
+            <td mat-cell *matCellDef="let element" class="p-10"> {{element.snippet}} </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+</div>

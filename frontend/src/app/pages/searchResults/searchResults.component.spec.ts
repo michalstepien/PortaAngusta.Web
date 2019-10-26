@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-
+import { SearchResultsComponent } from './searchResults.component';
 import { FormsModule } from '@angular/forms';
 
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -15,27 +15,26 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatRadioModule } from '@angular/material/radio';
+
 import { MatTableModule } from '@angular/material/table';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatPaginatorModule } from '@angular/material/paginator';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatExpansionModule } from '@angular/material/expansion';
-import { MatDividerModule } from '@angular/material/divider';
 
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
-import { JobComponent } from './job.component';
-
-describe('JobComponent', () => {
-  let component: JobComponent;
-  let fixture: ComponentFixture<JobComponent>;
+describe('SearchResultsComponent', () => {
+  let component: SearchResultsComponent;
+  let fixture: ComponentFixture<SearchResultsComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      imports: [RouterTestingModule,
+      imports: [ RouterTestingModule,
         HttpClientTestingModule,
         FormsModule,
         BrowserAnimationsModule,
+        MatTableModule,
+        MatCheckboxModule,
+        MatPaginatorModule,
         MatToolbarModule,
         MatIconModule,
         MatButtonModule,
@@ -46,21 +45,15 @@ describe('JobComponent', () => {
         MatTooltipModule,
         MatSnackBarModule,
         MatTabsModule,
-        MatRadioModule,
-        MatTableModule,
-        MatCheckboxModule,
-        MatPaginatorModule,
-        MatExpansionModule,
-        MatDividerModule,
-        MatChipsModule
+        MatRadioModule
       ],
-      declarations: [JobComponent]
+      declarations: [SearchResultsComponent]
     })
       .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(JobComponent);
+    fixture = TestBed.createComponent(SearchResultsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

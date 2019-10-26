@@ -21,6 +21,7 @@ export enum RunType {
 }
 
 export class Job {
+    public id = '';
     public name = '';
     public description = '';
     public typeJob = JobType.script;

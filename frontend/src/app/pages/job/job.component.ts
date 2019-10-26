@@ -6,6 +6,7 @@ import { SearchSettings } from '../../models/searchSettings';
 import { ActivatedRoute } from '@angular/router';
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { MatChipInputEvent } from '@angular/material/chips';
+import { MatTableDataSource } from '@angular/material/table';
 
 @Component({
   selector: 'app-job',
@@ -30,7 +31,15 @@ export class JobComponent implements OnInit {
     { text: 'Webcrawler', value: 'webcrawler' }
   ];
 
+  searchOutputType: Array<{ text: string, value: number }> = [
+    { text: 'Link', value: 1 },
+    { text: 'Snippet', value: 2 },
+    { text: 'Rank', value: 3 },
+    { text: 'Title', value: 4 }
+  ];
+
   job: Job = {
+    id: null,
     name: '',
     description: '',
     status: JobStatut.waiting,
@@ -41,9 +50,13 @@ export class JobComponent implements OnInit {
     searchSettings: {
       searchEngines: [],
       keywords: [],
+      outputs: [],
       numberPages: 1
     }
   };
+
+  jobResultHist = new MatTableDataSource<any>([]);
+  displayedColumns: string[] = ['id', 'start', 'end', 'count'];
 
   visible = true;
   selectable = true;
@@ -53,23 +66,24 @@ export class JobComponent implements OnInit {
 
   constructor(private snackBar: MatSnackBar, private http: HttpClient, private route: ActivatedRoute) { }
 
-  ngOnInit() {
-    this.route.params.subscribe(p => {
+  async ngOnInit() {
+    this.route.params.subscribe(async p => {
       if (p.id && p.id !== '0:0') {
         this.loader = true;
-        this.http.get<Job>('/api/jobs/job/' + p.id).toPromise().then((d) => {
-          this.job = d;
-          this.loader = false;
-          if (!this.job.searchSettings) {
-            this.job.searchSettings = {
-              searchEngines: [],
-              keywords: [],
-              numberPages: 1
-            };
-          }
-        });
+        this.job = await this.http.get<Job>('/api/jobs/job/' + p.id).toPromise();
+        this.loader = false;
+        if (!this.job.searchSettings) {
+          this.job.searchSettings = {
+            searchEngines: [],
+            keywords: [],
+            outputs: [],
+            numberPages: 1
+          };
+        }
+        await this.loadJobRunHistory();
       } else {
         this.job = new Job();
+        this.job.id = null;
         this.job.name = '';
         this.job.description = '';
         this.job.status = JobStatut.waiting;
@@ -82,13 +96,11 @@ export class JobComponent implements OnInit {
     });
   }
 
-  public save() {
+  public async save() {
     this.loader = true;
-
-    this.http.post<Job>('/api/jobs/job', { job: this.job }).toPromise().then((d) => {
-      this.openSnackBar();
-      this.loader = false;
-    });
+    await this.http.post<Job>('/api/jobs/job', { job: this.job }).toPromise();
+    this.openSnackBar();
+    this.loader = false;
   }
 
   openSnackBar() {
@@ -120,9 +132,18 @@ export class JobComponent implements OnInit {
     }
   }
 
-  run() {
-    this.http.get('/api/jobs/job').toPromise().then((d) => {
+  async run() {
+    await this.http.get('/api/jobs/job/run/' + this.job.id).toPromise();
+    this.snackBar.open('Job running', null, {
+      duration: 2000,
+      panelClass: ['mat-accent']
     });
+  }
+
+  async loadJobRunHistory() {
+    const res: any = await this.http.get('/api/jobs/results/list/' + this.job.id).toPromise();
+    console.log(res.results);
+    this.jobResultHist.data = res.results;
   }
 
 }

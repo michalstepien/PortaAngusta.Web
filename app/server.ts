@@ -6,6 +6,7 @@ import LiveQueries from './db/live';
 import createController from './routes';
 import Session from './core/session';
 import process from 'process';
+import url from 'url';
 
 dotenv.config();
 
@@ -37,6 +38,31 @@ class App {
     private configMiddelwares(): void {
         this.app.use(express.json());
         this.app.use(Session.middleware);
+        this.app.use((req, res, next) => {
+            let r: string = req.get('Referer');
+            if (r && r.includes('/api/proxy/url/') && !req.originalUrl.includes('/api/proxy/')) {
+                r = r.replace('http://' + req.get('Host') + '/api/proxy/url/', '');
+                r = decodeURIComponent(r);
+                if (r) {
+                    try {
+                        const p = new url.URL(r);
+                        const u = 'http://' + req.get('Host') + '/api/proxy/file/' +
+                        encodeURIComponent(p.protocol + '//' + p.hostname + req.originalUrl);
+                        console.log(u);
+                        return res.redirect(301, u);
+                    } catch (error) {
+                        console.log('err', r);
+                    }
+                }
+                // return res.redirect(301, url);
+            }
+            // Don't allow user to hit Heroku now that we have a domain
+            // var host = req.get('Host');
+            // if (host === 'serviceworker-cookbook.herokuapp.com') {
+            //   return res.redirect(301, 'https://serviceworke.rs/' + req.originalUrl);
+            // }
+            return next();
+        });
         this.app.set(
             'json replacer',
             ( key: any, value: any ) => {

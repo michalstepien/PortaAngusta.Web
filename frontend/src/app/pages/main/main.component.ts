@@ -23,6 +23,7 @@ export class MainComponent implements OnInit {
 
   public buildMenu() {
     this.menu.push({link: '/app/jobs', name: 'Jobs'});
+    this.menu.push({link: '/app/proxy', name: 'Proxy'});
     this.menu.push({link: '/app/scripts', name: 'Scripts'});
     this.menu.push({link: '/app/about', name: 'About me'});
   }

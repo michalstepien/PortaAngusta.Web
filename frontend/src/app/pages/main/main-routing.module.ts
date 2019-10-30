@@ -10,6 +10,7 @@ const routes: Routes = [
   {
     path: 'app', component: MainComponent, children: [
       { path: 'jobs', loadChildren: () => import('../jobs/jobs.module').then(m => m.JobsModule) },
+      { path: 'proxy', loadChildren: () => import('../proxy/proxy.module').then(m => m.ProxyModule) },
       { path: 'searchresults/:id', loadChildren: () => import('../searchResults/searchResults.module').then(m => m.SearchResultsModule) },
       { path: 'job/:id', outlet: 'side1', loadChildren: () => import('../job/job.module').then(m => m.JobModule) },
       { path: 'scripts', loadChildren: () => import('../scripts/scripts.module').then(m => m.ScriptsModule) },

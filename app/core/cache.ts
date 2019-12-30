@@ -27,6 +27,10 @@ class Cache {
         }
     }
 
+    public async getRaw(key: string): Promise<any> {
+        return await this.getC(key);
+    }
+
     public async set(key: string, value: any, mode?: string, duration?: number): Promise<any> {
         const args: Array<any> = [ key ];
         if (this.checkPrimitive(value)) {

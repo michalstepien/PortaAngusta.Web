@@ -8,6 +8,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatCardModule } from '@angular/material/card';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatSelectModule } from '@angular/material/select';
+import { MonacoEditorModule } from 'ngx-monaco-editor';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+
 
 import { ProxyRoutingModule } from './proxy-routing.module';
 import { ProxyComponent } from './proxy.component';
@@ -25,7 +28,9 @@ import { ProxyComponent } from './proxy.component';
     MatFormFieldModule,
     MatCardModule,
     MatExpansionModule,
-    MatSelectModule
+    MatSelectModule,
+    MatCheckboxModule,
+    MonacoEditorModule.forRoot()
   ]
 })
 export class ProxyModule { }

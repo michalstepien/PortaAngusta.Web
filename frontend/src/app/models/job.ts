@@ -1,8 +1,10 @@
 import { SearchSettings } from './searchSettings';
+import { CrawlerSettings } from './crawlerSettings';
 
 export enum JobType {
     script = 0,
-    search = 1
+    search = 1,
+    crawler = 2
 }
 
 export enum JobStatut {
@@ -32,6 +34,7 @@ export class Job {
     public delay = 0;
     public crone = '';
     public searchSettings: SearchSettings = null;
+    public crawlerSettings: CrawlerSettings = null;
 
     constructor() {
     }

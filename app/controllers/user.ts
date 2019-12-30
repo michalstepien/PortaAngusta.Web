@@ -9,6 +9,7 @@ import { Auth as AuthProccess } from '../core/auth';
 import Session from '../core/session';
 import connection from '../db';
 import Bull from 'bull';
+import { JobCrawler } from '../models/jobCrawler';
 
 
 @Controller('users')
@@ -227,27 +228,35 @@ export class UserController extends BaseController {
     @Return(Company)
     public async linq() {
 
-        const a: Company = new Company();
-        const ret = await a.collection().where((t) => t.name === 'test company' || t.name === 'test2').execute();
-        const retCount = await a.collection().count().executeProjection();
-        const retSel = await a.collection().select((t) =>
-            ({
-                upper: t.name.toUpperCase(),
-                lower: t.name.toLowerCase(),
-                length: t.name.lengthString(),
-                replace: t.name.replace('t', 'p'),
-                trim: t.name.trim(),
-                charAt: t.name.charAt(0),
-                // indexof: t.name.indexOf('t', 0),
-                hash: t.name.hash(),
-                typeProp: t.name.type(),
-                size: t.addressesList.size()
-            }))
-            .limit(50).executeProjection();
-        const ret2 = await a.collection().select((t) => t.name).count((t) => t.name).groupBy((t) => t.name).executeProjection();
-        const ret3 = await a.collection().orderBy((t) => t.name).execute();
-        const ret4 = await a.collection().orderBy((t) => t.name).skip(2).limit(5).execute();
-        return { where: ret, count: retCount, retSel, groupby: ret2, orderby: ret3, skiplimit: ret4 };
+        // const a: Company = new Company();
+        // const ret = await a.collection().where((t) => t.name === 'test company' || t.name === 'test2').execute();
+        // const retCount = await a.collection().count().executeProjection();
+        // const retSel = await a.collection().select((t) =>
+        //     ({
+        //         id: t.id,
+        //         upper: t.name.toUpperCase(),
+        //         lower: t.name.toLowerCase(),
+        //         length: t.name.lengthString(),
+        //         replace: t.name.replace('t', 'p'),
+        //         trim: t.name.trim(),
+        //         charAt: t.name.charAt(0),
+        //         // indexof: t.name.indexOf('t', 0),
+        //         hash: t.name.hash(),
+        //         typeProp: t.name.type(),
+        //         size: t.addressesList.size()
+        //     }))
+        //     .limit(50).executeProjection();
+        // const ret2 = await a.collection().select((t) => t.name).count((t) => t.name).groupBy((t) => t.name).executeProjection();
+        // const ret3 = await a.collection().orderBy((t) => t.name).execute();
+        // const ret4 = await a.collection().orderBy((t) => t.name).skip(2).limit(5).execute();
+
+        const jCrawler = new JobCrawler();
+        const jobid = '24:3';
+        const jCrSaved = await jCrawler.collection()
+            .where(z => z.job.id === jobid, {jobid})
+            .select(z => ({ url: z.url, id: z.id })).executeProjection();
+
+        return jCrSaved;
     }
 
     @Get('linqfromlink')
@@ -360,7 +369,7 @@ export class UserController extends BaseController {
     @Description('puppeter run')
     public async puppeter(@Param keyword: string) {
         const queueSearchEngine = new Bull('queueSearchEngine', 'redis://localhost:6379');
-        queueSearchEngine.add({keyword});
+        queueSearchEngine.add({ keyword });
         return { ok: true };
     }
 }

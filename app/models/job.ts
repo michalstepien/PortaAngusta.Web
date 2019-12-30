@@ -1,5 +1,6 @@
 import { Base, dbProperty, ModelClass, dbTypes } from './base';
 import { SearchSettings } from './searchSettings';
+import { CrawlerSettings } from './crawlerSettings';
 
 @ModelClass('Job')
 export class Job extends Base<Job> {
@@ -34,6 +35,9 @@ export class Job extends Base<Job> {
     @dbProperty(null, dbTypes.Embedded, SearchSettings)
     public searchSettings: SearchSettings = null;
 
+    @dbProperty(null, dbTypes.Embedded, CrawlerSettings)
+    public crawlerSettings: CrawlerSettings = null;
+
     constructor() {
         super(Job);
     }
@@ -41,7 +45,8 @@ export class Job extends Base<Job> {
 
 export enum JobType {
     script = 0,
-    search = 1
+    search = 1,
+    crawler = 2
 }
 
 export enum JobStatut {

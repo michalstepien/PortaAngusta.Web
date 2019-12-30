@@ -97,6 +97,24 @@ export class ProxyController extends BaseController {
                       }
                       return false;
                   }
+                  document.onkeydown = function(evt) {
+                    evt = evt || window.event;
+                    var isEscape = false;
+                    if ("key" in evt) {
+                        isEscape = (evt.key === "Escape" || evt.key === "Esc");
+                    } else {
+                        isEscape = (evt.keyCode === 27);
+                    }
+                    if (isEscape) {
+                      window.paInspect = false;
+                      const d = document.getElementsByClassName('portangusta-high');
+                      Array.from(d).forEach((el) => {
+                        if (!el.classList.contains('portangusta-high-click')){
+                          el.classList.remove('portangusta-high');
+                        }
+                      });
+                    }
+                  };
                 })();
                 </script>
               `);

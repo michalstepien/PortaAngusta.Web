@@ -1,8 +1,4 @@
 <div class="p-15 df cvh">
-    <!-- <button (click)="inspect()">Inspect</button>
-    <button (click)="getSelectedHtml()">getSelectedHtml</button>
-    <button (click)="identify()">idnetify</button>
-    <button (click)="siblings()">siblings</button> -->
 
     <div class="pr-10">
         <button mat-raised-button color="accent" (click)="inspect()">
@@ -31,9 +27,11 @@
 
 <iframe id="proxyFrame" [src]="urlSafe" width="100%" height="90%" frameBorder="0" (load)="onLoadedProxy()"></iframe>
 
-<mat-card class="inspect-card">
+<mat-card class="inspect-card mat-elevation-z8">
     <mat-card-header>
-        <div mat-card-avatar class="example-header-image"><mat-icon>tab_unselected</mat-icon></div>
+        <div mat-card-avatar class="example-header-image">
+            <mat-icon>tab_unselected</mat-icon>
+        </div>
         <mat-card-title>Selected elements</mat-card-title>
         <mat-card-subtitle>Elements: {{inspectedElements.length}}</mat-card-subtitle>
     </mat-card-header>
@@ -42,24 +40,41 @@
             <input matInput placeholder="name" name="name" [(ngModel)]="name">
         </mat-form-field>
         <mat-accordion>
-            <mat-expansion-panel *ngFor="let p of inspectedElements; index as i">
-              <mat-expansion-panel-header>
-                <mat-panel-title>
-                  Element {{i}}
-                </mat-panel-title>
-              </mat-expansion-panel-header>
-              <mat-select [(ngModel)]="p.output" name="output">
-                <mat-option *ngFor="let f of outputType" [value]="f.value">
-                  {{f.text}}
-                </mat-option>
-              </mat-select>
-              <button mat-button (click)="previewOutput(p)">Preview output</button>
-              <button mat-button>Remove</button>
-            </mat-expansion-panel>
-          </mat-accordion>
+            <div class="mh-500">
+                <mat-expansion-panel *ngFor="let p of inspectedElements; index as i">
+                    <mat-expansion-panel-header>
+                        <mat-panel-title>
+                            Element {{i}}
+                        </mat-panel-title>
+                    </mat-expansion-panel-header>
+                    <mat-checkbox [(ngModel)]="p.siblings" (ngModelChange)="siblings(p)">Siblings</mat-checkbox>
+                    <mat-select [(ngModel)]="p.output" name="output">
+                        <mat-option *ngFor="let f of outputType" [value]="f.value">
+                            {{f.text}}
+                        </mat-option>
+                    </mat-select>
+                    <button mat-button (click)="previewOutput(p)">Preview output</button>
+                    <button mat-button (click)="identify(p)">Identify</button>
+                    <button mat-button (click)="remove(i, p)">Remove</button>
+                </mat-expansion-panel>
+            </div>
+
+        </mat-accordion>
     </mat-card-content>
     <mat-card-actions>
         <button mat-button>Save</button>
         <button mat-button>Clear</button>
     </mat-card-actions>
+</mat-card>
+
+<mat-card class="output-card mat-elevation-z8" *ngIf="showPreview">
+        <mat-card-header>
+            <div mat-card-avatar class="example-header-image">
+                <mat-icon>tab_unselected</mat-icon>
+            </div>
+            <mat-card-title>Output</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+                <ngx-monaco-editor [options]="editorOptions" [(ngModel)]="outputValue"></ngx-monaco-editor>
+        </mat-card-content>
 </mat-card>

@@ -222,7 +222,7 @@ export class Base<T> {
         // TO DO: change to command
         // TO DO: dont throw No such record
         const ses = await connection.ses();
-        const record = await ses.record.get('#' + this.id);
+        const record = await ses.record.get('#' + this.id.replace('#', ''));
         ses.close();
         return this.importRecord(record);
     }
@@ -230,7 +230,7 @@ export class Base<T> {
     public async  delete(): Promise<T> {
         // TO DO: change to command
         const ses = await connection.ses();
-        const ret = ses.record.delete('#' + this.id);
+        const ret = ses.record.delete('#' + this.id.replace('#', ''));
         ses.close();
         return ret;
     }
@@ -448,7 +448,6 @@ export class Base<T> {
             let hasCasched = false;
             let qret = null;
             const hash = crypto.createHash('md5').update(cmd).digest('hex');
-            console.log(cmd);
             if (cached) {
                 if (await cache.exists(hash)) {
                     hasCasched = true;
@@ -486,13 +485,13 @@ export class Base<T> {
             }
         }, async (cmd: string, params: any) => {
             const ses = await connection.ses();
-            console.log(cmd);
+            // console.log(cmd);
             const qret = await ses.command(cmd, { params }).all();
             ses.close();
             return qret;
         }, async (cmd: string, params: any) => {
             const ses = await connection.ses();
-            console.log(cmd);
+            // console.log(cmd);
             const qret = await ses.command(cmd, { params }).all();
             ses.close();
             return qret;

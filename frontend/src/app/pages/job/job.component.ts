@@ -7,6 +7,7 @@ import { ActivatedRoute } from '@angular/router';
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { MatChipInputEvent } from '@angular/material/chips';
 import { MatTableDataSource } from '@angular/material/table';
+import { CrawlerSettings } from 'src/app/models/crawlerSettings';
 
 @Component({
   selector: 'app-job',
@@ -16,8 +17,9 @@ import { MatTableDataSource } from '@angular/material/table';
 export class JobComponent implements OnInit {
   loader = false;
   types: Array<{ text: string, value: number }> = [
-    { text: 'Script', value: 2 },
-    { text: 'Search', value: 1 }
+    { text: 'Script', value: 0 },
+    { text: 'Search', value: 1 },
+    { text: 'Crawler', value: 2 }
   ];
 
   searchTypes: Array<{ text: string, value: string }> = [
@@ -52,6 +54,15 @@ export class JobComponent implements OnInit {
       keywords: [],
       outputs: [],
       numberPages: 1
+    },
+    crawlerSettings: {
+      deep: 0,
+      startPage: '',
+      maxLinks: 0,
+      maxLinksSite: 0,
+      sameDomain: false,
+      sameSite: true,
+      timeout: 0
     }
   };
 
@@ -80,6 +91,17 @@ export class JobComponent implements OnInit {
             numberPages: 1
           };
         }
+        if (!this.job.crawlerSettings) {
+          this.job.crawlerSettings = {
+            deep: 0,
+            startPage: '',
+            maxLinks: 0,
+            maxLinksSite: 0,
+            sameDomain: false,
+            sameSite: true,
+            timeout: 0
+          };
+        }
         await this.loadJobRunHistory();
       } else {
         this.job = new Job();
@@ -92,6 +114,7 @@ export class JobComponent implements OnInit {
         this.job.crone = '';
         this.job.runType = RunType.manual;
         this.job.searchSettings = new SearchSettings();
+        this.job.crawlerSettings = new CrawlerSettings();
       }
     });
   }
@@ -142,7 +165,6 @@ export class JobComponent implements OnInit {
 
   async loadJobRunHistory() {
     const res: any = await this.http.get('/api/jobs/results/list/' + this.job.id).toPromise();
-    console.log(res.results);
     this.jobResultHist.data = res.results;
   }
 

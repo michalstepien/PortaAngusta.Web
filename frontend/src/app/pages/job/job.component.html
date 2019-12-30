@@ -60,14 +60,14 @@
         </mat-tab>
         <!-- INPUTS -->
         <mat-tab label="Inputs">
-          <mat-form-field class="fw pt-15">
+          <mat-form-field class="fw pt-15" *ngIf="job.typeJob == 1">
             <mat-select name="searchTypes" [(ngModel)]="job.searchSettings.searchEngines" multiple>
               <mat-option *ngFor="let f of searchTypes" [value]="f.value">
                 {{f.text}}
               </mat-option>
             </mat-select>
           </mat-form-field>
-          <mat-form-field class="w-80">
+          <mat-form-field class="w-80" *ngIf="job.typeJob == 1">
             <mat-chip-list #chipList aria-label="Keyword selection">
               <mat-chip *ngFor="let k of job?.searchSettings?.keywords" [selectable]="selectable"
                 [removable]="removable" (removed)="remove(k)">
@@ -79,10 +79,30 @@
                 (matChipInputTokenEnd)="add($event)">
             </mat-chip-list>
           </mat-form-field>
-          <mat-form-field class="fw">
+          <mat-form-field class="fw" *ngIf="job.typeJob == 1">
             <input type="number" matInput placeholder="Number of pages" [(ngModel)]="job.searchSettings.numberPages"
               name="numpages">
           </mat-form-field>
+          <div class="pt-15" *ngIf="job.typeJob == 2">
+            <mat-form-field class="fw">
+              <input type="text" matInput placeholder="Start page" [(ngModel)]="job.crawlerSettings.startPage" name="startpage">
+            </mat-form-field>
+            <mat-form-field class="fw">
+              <input type="number" matInput placeholder="Deep" [(ngModel)]="job.crawlerSettings.deep" name="deep">
+            </mat-form-field>
+            <mat-form-field class="fw">
+              <input type="number" matInput placeholder="Max links" [(ngModel)]="job.crawlerSettings.maxLinks" name="maxlinks">
+            </mat-form-field>
+            <mat-form-field class="fw">
+              <input type="number" matInput placeholder="Max links site" [(ngModel)]="job.crawlerSettings.maxLinksSite" name="maxlinkssite">
+            </mat-form-field>
+            <mat-form-field class="fw">
+              <input type="number" matInput placeholder="Timeout" [(ngModel)]="job.crawlerSettings.timeout" name="timeout">
+            </mat-form-field>
+            <mat-checkbox [(ngModel)]="job.crawlerSettings.sameSite" name="sameSite">Same site</mat-checkbox>
+            <mat-checkbox class="pl-15" [(ngModel)]="job.crawlerSettings.sameDomain" name="sameDomain">Same domain</mat-checkbox>
+            
+          </div>
 
         </mat-tab>
         <!-- OUTPUTS -->
@@ -97,7 +117,7 @@
         </mat-tab>
       </mat-tab-group>
       <mat-divider></mat-divider>
-      <mat-accordion class="pt-15">
+      <mat-accordion class="pt-15" *ngIf="job.typeJob !== 2">
         <mat-expansion-panel>
           <mat-expansion-panel-header>
             <mat-panel-title>

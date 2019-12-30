@@ -1,6 +1,18 @@
 .inspect-card{
     width: 400px;
     position: absolute;
-    right: 0;
-    bottom: 0;
+    right: 20px;
+    bottom: 10px;
+}
+
+.mh-500 {
+   max-height: 500px;
+   overflow-y: scroll;
+}
+
+.output-card {
+    width: calc(100% - 600px);
+    position: absolute;
+    left: 20px;
+    bottom: 10px;
 }

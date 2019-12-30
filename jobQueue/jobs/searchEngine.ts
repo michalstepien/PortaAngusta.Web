@@ -46,7 +46,9 @@ module.exports = async function(d: any) {
                         searchEngine: se
                     } as ISearchOutput;
                 });
-                results.push(...r2);
+                if (r2.link) {
+                    results.push(...r2);
+                }
             });
           });
     }

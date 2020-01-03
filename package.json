@@ -27,6 +27,7 @@
     "cls-hooked": "^4.2.2",
     "commander": "^2.20.0",
     "contextual-element-identifier": "0.0.1",
+    "deepspeech": "^0.6.0",
     "dotenv": "^8.0.0",
     "ensure-login": "^0.1.4",
     "express": "^4.17.1",

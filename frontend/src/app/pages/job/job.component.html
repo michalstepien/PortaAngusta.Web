@@ -21,7 +21,8 @@
       </mat-form-field>
 
       <mat-form-field class="fw">
-        <textarea matInput mat-autosize name="description" [(ngModel)]="job.description"
+        <textarea matInput cdkTextareaAutosize cdkAutosizeMinRows="1"
+          cdkAutosizeMaxRows="10" name="description" [(ngModel)]="job.description"
           placeholder="Write a description"></textarea>
       </mat-form-field>
 
@@ -47,21 +48,21 @@
               Delayed
             </mat-radio-button>
           </mat-radio-group>
-          <ng-template  [ngIf]="job.runType == 1">
+          <ng-template [ngIf]="job.runType == 1">
             <mat-form-field class="fw">
               <input matInput placeholder="Cron command ex. 1 0 * * *" name="cron" [(ngModel)]="job.crone">
             </mat-form-field>
           </ng-template>
-          <ng-template  [ngIf]="job.runType == 2">
+          <ng-template [ngIf]="job.runType == 2">
             <mat-form-field class="fw">
               <input matInput placeholder="Delay seconds" name="delay" [(ngModel)]="job.delay">
             </mat-form-field>
-          </ng-template> 
+          </ng-template>
         </mat-tab>
         <!-- INPUTS -->
         <mat-tab label="Inputs">
           <mat-form-field class="fw pt-15" *ngIf="job.typeJob == 1">
-            <mat-select name="searchTypes" [(ngModel)]="job.searchSettings.searchEngines" multiple>
+            <mat-select name="searchTypes" [(ngModel)]="job.searchSettings.searchEngines" [multiple]="true">
               <mat-option *ngFor="let f of searchTypes" [value]="f.value">
                 {{f.text}}
               </mat-option>
@@ -85,30 +86,35 @@
           </mat-form-field>
           <div class="pt-15" *ngIf="job.typeJob == 2">
             <mat-form-field class="fw">
-              <input type="text" matInput placeholder="Start page" [(ngModel)]="job.crawlerSettings.startPage" name="startpage">
+              <input type="text" matInput placeholder="Start page" [(ngModel)]="job.crawlerSettings.startPage"
+                name="startpage">
             </mat-form-field>
             <mat-form-field class="fw">
               <input type="number" matInput placeholder="Deep" [(ngModel)]="job.crawlerSettings.deep" name="deep">
             </mat-form-field>
             <mat-form-field class="fw">
-              <input type="number" matInput placeholder="Max links" [(ngModel)]="job.crawlerSettings.maxLinks" name="maxlinks">
+              <input type="number" matInput placeholder="Max links" [(ngModel)]="job.crawlerSettings.maxLinks"
+                name="maxlinks">
             </mat-form-field>
             <mat-form-field class="fw">
-              <input type="number" matInput placeholder="Max links site" [(ngModel)]="job.crawlerSettings.maxLinksSite" name="maxlinkssite">
+              <input type="number" matInput placeholder="Max links site" [(ngModel)]="job.crawlerSettings.maxLinksSite"
+                name="maxlinkssite">
             </mat-form-field>
             <mat-form-field class="fw">
-              <input type="number" matInput placeholder="Timeout" [(ngModel)]="job.crawlerSettings.timeout" name="timeout">
+              <input type="number" matInput placeholder="Timeout" [(ngModel)]="job.crawlerSettings.timeout"
+                name="timeout">
             </mat-form-field>
             <mat-checkbox [(ngModel)]="job.crawlerSettings.sameSite" name="sameSite">Same site</mat-checkbox>
-            <mat-checkbox class="pl-15" [(ngModel)]="job.crawlerSettings.sameDomain" name="sameDomain">Same domain</mat-checkbox>
-            
+            <mat-checkbox class="pl-15" [(ngModel)]="job.crawlerSettings.sameDomain" name="sameDomain">Same domain
+            </mat-checkbox>
+
           </div>
 
         </mat-tab>
         <!-- OUTPUTS -->
         <mat-tab label="Outputs">
           <mat-form-field class="fw">
-            <mat-select name="searchOutputType" [(ngModel)]="job.searchSettings.outputs" multiple>
+            <mat-select name="searchOutputType" [(ngModel)]="job.searchSettings.outputs" [multiple]="true">
               <mat-option *ngFor="let f of searchOutputType" [value]="f.value">
                 {{f.text}}
               </mat-option>

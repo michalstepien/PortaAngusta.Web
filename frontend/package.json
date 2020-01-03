@@ -5,7 +5,7 @@
     "ng": "ng",
     "start": "ng serve",
     "startp": "ng serve --proxy-config proxy.config.json",
-    "build": "ng build",
+    "build": "ng build --prod=true",
     "test": "ng test",
     "test-frontend": "ng test --watch=false --browsers=ChromeHeadless --code-coverage",
     "lint": "ng lint",
@@ -26,20 +26,20 @@
     "@angular/router": "~9.0.0-next.12",
     "contextual-element-identifier": "0.0.1",
     "hammerjs": "^2.0.8",
-    "ngx-monaco-editor": "^8.1.0",
+    "ngx-monaco-editor": "^8.1.1",
     "rxjs": "~6.5.3",
     "tslib": "^1.10.0",
     "zone.js": "~0.10.2"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "~0.803.12",
-    "@angular/cli": "~8.3.12",
+    "@angular-devkit/build-angular": "~0.900.0-rc.7",
+    "@angular/cli": "~9.0.0-rc.7",
     "@angular/compiler-cli": "~9.0.0-next.12",
     "@angular/language-service": "~9.0.0-next.12",
-    "@types/node": "~8.9.4",
+    "@types/node": "^12.11.1",
     "@types/jasmine": "~3.3.8",
     "@types/jasminewd2": "~2.0.3",
-    "codelyzer": "^5.0.0",
+    "codelyzer": "^5.1.2",
     "jasmine-core": "~3.4.0",
     "jasmine-spec-reporter": "~4.2.1",
     "karma": "~4.1.0",
@@ -50,6 +50,6 @@
     "protractor": "~5.4.0",
     "ts-node": "~7.0.0",
     "tslint": "~5.15.0",
-    "typescript": "~3.5.3"
+    "typescript": "~3.6.4"
   }
 }
